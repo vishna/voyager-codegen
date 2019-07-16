@@ -1,0 +1,23 @@
+plugins {
+    base
+    kotlin("jvm") version "1.3.21" apply false
+}
+
+allprojects {
+
+    group = "dev.vishna.voyager"
+    version = "0.1.0-SNAPSHOT"
+
+    repositories {
+        mavenCentral()
+        maven("https://jitpack.io")
+        jcenter()
+    }
+}
+
+dependencies {
+    // Make the root project archives configuration depend on every sub-project
+    subprojects.forEach {
+        archives(it)
+    }
+}

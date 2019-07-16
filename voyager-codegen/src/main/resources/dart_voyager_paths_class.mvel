@@ -1,0 +1,5 @@
+/// Generated file, DO NOT EDIT
+class @{name} {
+@foreach{path : paths}  @{resolver.pathExpression(path)}
+  @{resolver.typeExpression(path)}@end{'\n'}
+}
