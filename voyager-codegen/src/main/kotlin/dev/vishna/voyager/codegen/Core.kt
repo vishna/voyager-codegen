@@ -1,8 +1,9 @@
 package dev.vishna.voyager.codegen
 
-import dev.vishna.emojilog.*
+
 import com.eyeem.routerconstants.DartResolver
 import com.eyeem.routerconstants.RouterPath
+import dev.vishna.emojilog.std.*
 import dev.vishna.mvel.interpolate
 import dev.vishna.stringcode.asResource
 import dev.vishna.stringcode.saveAs
@@ -22,7 +23,7 @@ const val dartVoyagerPathsClass : ResourcePath = "/dart_voyager_paths_class.mvel
 const val voyagerCodegen : ResourcePath = "/voyager-codegen.yaml"
 
 fun bootstrapVoyagerPatrolConfig(patrolFile: File) = if (File(pwd, "pubspec.yaml").exists()) {
-        log.warn.."${patrolFile.name} not found, creating one for you..."
+        log.alert.."${patrolFile.name} not found, creating one for you..."
         voyagerCodegen.asResource().saveAs(patrolFile.absolutePath)
         log.save.."${patrolFile.name} created, please edit it"
         true
