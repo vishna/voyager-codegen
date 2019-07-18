@@ -9,6 +9,7 @@ buildscript {
 plugins {
     application
     kotlin("jvm")
+    maven
     id("com.github.johnrengelman.shadow") version "5.1.0"
 }
 
@@ -18,10 +19,14 @@ application {
     mainClassName = "cli.Main"
 }
 
-tasks.withType<ShadowJar> {
+val shadowJar: ShadowJar by tasks
+shadowJar.apply {
     baseName = "voyager-codegen"
     archiveName = "voyager-codegen.jar"
-    version = version
+}
+
+artifacts {
+    archives(shadowJar)
 }
 
 dependencies {

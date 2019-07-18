@@ -8,7 +8,12 @@ import org.gradle.kotlin.dsl.*
 fun Project.kotlinProject() {
     dependencies {
         "compile"(kotlin("stdlib"))
-        "compile"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1")
-        "compile"("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.0.1")
+        "compile"("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.kotlinCoroutinesVersion}")
+        "compile"("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:${Versions.kotlinCoroutinesVersion}")
     }
+}
+
+object Versions {
+    const val kotlinVersion = "1.3.21"
+    const val kotlinCoroutinesVersion = "1.0.1"
 }
