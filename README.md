@@ -1,8 +1,6 @@
 # voyager-codegen
 
-![](https://media.giphy.com/media/w3J7mstYCISqs/giphy.gif)
-
-> Kot is a cat in Polish and voyager is in space, therefore the above gif.
+![](http://giphygifs.s3.amazonaws.com/media/TF3uA6xGKOohO/giphy.gif)
 
 ## Overview
 
@@ -13,7 +11,7 @@ voyager-codegen is a complimentary tool for the flutter library [voyager](https:
 Firstly dowload `voyager-codegen.jar` from the internets to where your flutter project is (that is where `pubspec.yaml` is):
 
 ```
-wget TODO
+wget https://jitpack.io/com/github/vishna/voyager-codegen/cli/master-SNAPSHOT/cli-master-SNAPSHOT-all.jar -O voyager-codegen.jar
 ```
 
 Next up start voyager-codegen:
