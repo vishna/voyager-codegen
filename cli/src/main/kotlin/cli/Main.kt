@@ -14,7 +14,11 @@ fun main(args: CommandArgs) = args.patrol {
     }
 
     onInspection { watchPoint, dryRun ->
-        generateVoyagerPaths(watchPoint.name, watchPoint.source, watchPoint.target, dryRun)
+        generateVoyagerPaths(
+            name = watchPoint.name,
+            source = watchPoint.source,
+            target = requireNotNull(watchPoint["target"] as String?) { "target value not provided in $watchPoint" },
+            dryRun = dryRun)
     }
 
     bootstrap(::bootstrapVoyagerPatrolConfig)

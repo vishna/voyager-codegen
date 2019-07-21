@@ -1,5 +1,5 @@
 ## This file should be checked in version control
 ## Describes sources and targets for the voyager-codegen tool
-- name: VoyagerPaths
+- name: Voyager # base name for generated classes, e.g. VoyagerPaths, VoyagerTests etc.
   source: # TODO supply location of your voyager map
-  target: lib/gen/voyager_paths.dart
+  target: lib/gen/voyager_gen.dart

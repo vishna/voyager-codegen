@@ -1,5 +1,5 @@
 /// Generated file, DO NOT EDIT
-class @{name} {
+class @{name}Paths {
 @foreach{path : paths}  @{resolver.pathExpression(path)}
   @{resolver.typeExpression(path)}@end{'\n'}
 }
