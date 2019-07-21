@@ -31,3 +31,18 @@ The above will bootstrap `voyager-cogegen.yaml` in your flutter project, like so
 Obviously you need to edit this file and point it to location where voyager's configuration yaml is stored. You can point it directly to a yaml file or a dart file - it will try to find first triple ```'''``` quoted string in that file - be warned 😱 Sorry - if you go for yaml in source code just don't keep it with anything else.
 
 `voyager-codegen` will keep on watching the project file and generate dart files if applicable.
+
+
+## More options
+```
+Usage: voyager-codegen [OPTIONS]
+
+  Code generation utility for the Voyager project.
+
+Options:
+  --run-once  Runs voyager-codegen only once, doesn't watch file system,
+              useful for CI/CD.
+  --dry-run   Runs voyager-codegen in a dry mode
+  --debug     Runs voyager-codegen in a debug mode
+  -h, --help  Show this message and exit
+```
