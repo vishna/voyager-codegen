@@ -3,10 +3,12 @@ package dev.vishna.voyager.codegen
 
 import com.eyeem.routerconstants.DartResolver
 import com.eyeem.routerconstants.RouterPath
+import com.eyeem.routerconstants.dartfmt
 import dev.vishna.emojilog.std.*
 import dev.vishna.mvel.interpolate
 import dev.vishna.stringcode.asResource
 import dev.vishna.stringcode.saveAs
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.lang.IllegalStateException
 
@@ -31,7 +33,7 @@ fun bootstrapVoyagerPatrolConfig(patrolFile: File) = if (File(pwd, "pubspec.yaml
         false
     }
 
-fun generateVoyagerPaths(name: String, source: String, target: String, dryRun: Boolean) {
+suspend fun generateVoyagerPaths(name: String, source: String, target: String, dryRun: Boolean) {
 
     if (source.isBlank()) {
         throw IllegalStateException("No source value provided for $name")
@@ -52,26 +54,9 @@ fun generateVoyagerPaths(name: String, source: String, target: String, dryRun: B
         else -> throw IllegalStateException("Unsupported file extension ${voyagerFile.extension}")
     }.asYaml()
 
-    // collect all the paths
-    val paths = voyagerYaml
-        .keys
-        .map {
-            RouterPath(
-                path = it,
-                type = voyagerYaml[it]?.get("type")?.toString() ?: ""
-            )
-        }.filter { it.path.isNotBlank() }
+    val voyagerPathsDart = toPathsDart(name, voyagerYaml)
 
-    // calculate template
-    dartVoyagerPathsClass
-        .asResource()
-        .interpolate(
-            mapOf(
-                "resolver" to DartResolver(),
-                "name" to name,
-                "paths" to paths
-            )
-        )?.apply {
+    voyagerPathsDart?.apply {
             if (dryRun) {
                 log.tool..target
                 "------------------------------".println
@@ -95,4 +80,28 @@ fun generateVoyagerPaths(name: String, source: String, target: String, dryRun: B
                 }
             }
         }
+}
+
+internal suspend fun toPathsDart(name: String, input: Map<String, Map<String, *>>): String? {
+    // collect all the paths
+    val paths = input
+        .keys
+        .map {
+            RouterPath(
+                path = it,
+                type = input[it]?.get("type")?.toString() ?: ""
+            )
+        }.filter { it.path.isNotBlank() }
+
+    // calculate template
+    return dartVoyagerPathsClass
+        .asResource()
+        .interpolate(
+            mapOf(
+                "resolver" to DartResolver(),
+                "name" to name,
+                "paths" to paths
+            )
+        )
+        ?.dartfmt()
 }

@@ -11,6 +11,7 @@ dependencies {
     compile("com.github.vishna:string-code-ktx:master-SNAPSHOT")
     compile("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
     compile("com.github.vishna:emojilog:master-SNAPSHOT")
+    compile("com.github.vishna:kmnd:master-SNAPSHOT")
 
     testCompile("junit", "junit", "4.12")
     testCompile("org.amshove.kluent:kluent:1.34")
