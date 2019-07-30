@@ -1,60 +1,51 @@
 package dev.vishna.voyager.codegen
 
+import dev.vishna.stringcode.asResource
 import kotlinx.coroutines.runBlocking
 import org.amshove.kluent.`should be equal to`
 import org.junit.Test
 
+/**
+ * test_1.yaml is copied from https://github.com/vishna/voyager/tree/7f99fe1d9f3ae30ff9bd02343bd510b42b839700/example/lib
+ */
 class CoreTest {
 
-    /**
-     * Samples copied from https://github.com/vishna/voyager/tree/7f99fe1d9f3ae30ff9bd02343bd510b42b839700/example/lib
-     */
     @Test
-    fun generateDartFromYaml() = runBlocking {
+    fun calculateRouterPathsFromYaml() {
+        val voyagerYaml = "/test_1.yaml".asResource().asYaml()
+        val routerPaths = voyagerYaml.asRouterPaths()
 
-        val inputYaml = """
-            ---
-            '/home' :
-              type: 'home'
-              screen: PageWidget
-              title: "This is Home"
-              body: "Hello World"
-              fabPath: /fab
-            '/other/:title' :
-              type: 'other'
-              screen: PageWidget
-              body: "Welcome to the other side"
-              title: "This is %{title}"
-            '/fab' :
-              type: fab
-              screen: FabWidget
-              target: /other/thing
-              icon: e88f # check icons.dart for reference
-        """.trimIndent()
+        routerPaths.size `should be equal to` 3
+        routerPaths[0].path `should be equal to` "/home"
+        routerPaths[0].type `should be equal to` "home"
+        routerPaths[1].path `should be equal to` "/other/:title"
+        routerPaths[1].type `should be equal to` "other"
+        routerPaths[2].path `should be equal to` "/fab"
+        routerPaths[2].type `should be equal to` "fab"
+    }
 
-        val targetDart = """
-            /// Generated file, DO NOT EDIT
-            class VoyagerPaths {
-              static const String pathHome = "/home";
-              static const String typeHome = "home";
-              static String pathOther(String title) {
-                return "/other/${'$'}title";
-              }
-            
-              static const String typeOther = "other";
-              static const String pathFab = "/fab";
-              static const String typeFab = "fab";
-            }
+    @Test
+    fun generateDartFromYaml() = runBlocking<Unit> {
+        val voyagerYaml = "/test_1.yaml".asResource().asYaml()
+        val targetDart = "test_1.dart".asResource()
 
-        """.trimIndent()
-
-        val voyagerYaml = inputYaml.asYaml()
-        val generatedTargetDart = toPathsDart(name = "Voyager", input = voyagerYaml)
+        val generatedTargetDart = toPathsDart(name = "Voyager", routerPaths = voyagerYaml.asRouterPaths())
 
         requireNotNull(generatedTargetDart) { "Failed generating VoyagerPaths class for dart" }
 
         generatedTargetDart `should be equal to` targetDart
-        Unit
+    }
+
+    @Test
+    fun generateDartTests() = runBlocking<Unit> {
+        val voyagerYaml = "/test_1.yaml".asResource().asYaml()
+        val targetDart = "test_1_scenarios.dart".asResource()
+
+        val generatedTargetDart = toTestScenariosDart(name = "Voyager", routerPaths = voyagerYaml.asRouterPaths())
+
+        requireNotNull(generatedTargetDart) { "Failed generating VoyagerScenarios class for dart" }
+
+        generatedTargetDart `should be equal to` targetDart
     }
 
 }

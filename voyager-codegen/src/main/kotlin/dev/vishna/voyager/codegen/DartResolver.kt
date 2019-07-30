@@ -2,7 +2,12 @@ package com.eyeem.routerconstants
 
 import dev.vishna.kmnd.execute
 import dev.vishna.kmnd.weaveToBlocking
+import dev.vishna.mvel.interpolate
+import dev.vishna.stringcode.asResource
 import dev.vishna.stringcode.camelize
+import dev.vishna.voyager.codegen.dartVoyagerTestScenarioClass
+import dev.vishna.voyager.codegen.dartVoyagerTestScenarioExecutionBlock
+import dev.vishna.voyager.codegen.model.ScenarioClassName
 import kotlinx.coroutines.coroutineScope
 import java.io.ByteArrayOutputStream
 import java.lang.IllegalStateException
@@ -18,6 +23,14 @@ class DartResolver : LangResolver() {
             return """static String $name(${argsExpression(routerPath)}) {
                 |    return "${interpolationExpression(routerPath)}";
                 |  }""".trimMargin()
+        }
+    }
+
+    fun testPathExpression(routerPath: RouterPath): String {
+        if (routerPath.params.isEmpty()) {
+            return """"${routerPath.path}""""
+        } else {
+            return """"${interpolationExpression(routerPath)}""""
         }
     }
 
@@ -37,6 +50,14 @@ class DartResolver : LangResolver() {
 
     override fun typeExpression(routerPath: RouterPath): String {
         return """static const String ${"type_${routerPath.type}".camelize(startWithLowerCase = true)} = "${routerPath.type}";"""
+    }
+
+    override fun emit(scenarioClassName: ScenarioClassName): String {
+        return dartVoyagerTestScenarioClass.asResource().interpolate(scenarioClassName)!!
+    }
+
+    fun emitAsExecutionBlock(scenarioClassName: ScenarioClassName): String {
+        return dartVoyagerTestScenarioExecutionBlock.asResource().interpolate(scenarioClassName)!!
     }
 }
 

@@ -1,0 +1,75 @@
+/// Generated file, DO NOT EDIT
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
+import 'package:test_api/test_api.dart' as test_package;
+import 'package:voyager/voyager.dart';
+
+typedef WidgetWrapper = Widget Function(Widget nonWrappedWidget);
+
+@isTest
+void _testVoyagerWidget(
+  String description,
+  Future<RouterNG> routerFuture,
+  WidgetWrapper widgetWrapper,
+  @{baseScenarioClassName} scenario, {
+  bool skip = false,
+  test_package.Timeout timeout,
+  Duration initialTimeout,
+  bool semanticsEnabled = false,
+}) {
+  testWidgets(description, (WidgetTester tester) async {
+    await tester.runAsync(() async {
+      final router = await routerFuture;
+
+      expect(router, isInstanceOf<RouterNG>());
+
+      Widget widget = VoyagerWidget(path: scenario.path(), router: router);
+      widget = widgetWrapper != null ? widgetWrapper(widget) : widget;
+      widget = scenario.widgetWrapper != null ? scenario.widgetWrapper(widget) : widget;
+
+      await tester.pumpWidget(widget);
+
+      scenario.widgetTesterCallback(tester);
+    });
+  },
+      skip: skip,
+      timeout: timeout,
+      initialTimeout: initialTimeout,
+      semanticsEnabled: semanticsEnabled);
+}
+
+@experimental
+abstract class @{baseScenarioClassName} {
+  final String testDescription;
+  final WidgetTesterCallback widgetTesterCallback;
+  WidgetWrapper widgetWrapper;
+
+  @{baseScenarioClassName}(this.testDescription, this.widgetTesterCallback);
+
+  String path();
+  void addWidgetWrapper(WidgetWrapper widgetWrapper) {
+    this.widgetWrapper = widgetWrapper;
+  }
+}
+
+@foreach{scenarioClass : scenarioClasses}@{resolver.emit(scenarioClass)}@end{}
+
+@experimental
+abstract class @{baseScenarioClassName}s {
+  final WidgetWrapper defaultWrapper;
+
+  @{baseScenarioClassName}s(this.defaultWrapper);
+
+  @foreach{scenarioClass : scenarioClasses}List<@{scenarioClass.scenarioClassName}> @{scenarioClass.type()}Scenarios();@end{'\n'}
+}
+
+@isTestGroup @experimental
+void @{name}AutomatedTests(String description, Future<RouterNG> router,
+    @{baseScenarioClassName}s testScenarios, {bool forceTests = true}) {
+  group(description, () {
+
+@foreach{scenarioClass : scenarioClasses}@{resolver.emitAsExecutionBlock(scenarioClass)}@end{'\n'}
+
+  });
+}

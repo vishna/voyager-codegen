@@ -1,0 +1,17 @@
+---
+'/home' :
+  type: 'home'
+  screen: PageWidget
+  title: "This is Home"
+  body: "Hello World"
+  fabPath: /fab
+'/other/:title' :
+  type: 'other'
+  screen: PageWidget
+  body: "Welcome to the other side"
+  title: "This is %{title}"
+'/fab' :
+  type: fab
+  screen: FabWidget
+  target: /other/thing
+  icon: e88f # check icons.dart for reference

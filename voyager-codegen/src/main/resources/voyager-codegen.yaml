@@ -3,3 +3,5 @@
 - name: Voyager # base name for generated classes, e.g. VoyagerPaths, VoyagerTests etc.
   source: # TODO supply location of your voyager map
   target: lib/gen/voyager_gen.dart
+# uncomment for automated widget test skeleton
+#  testTarget: test/gen/voyager_gen.dart

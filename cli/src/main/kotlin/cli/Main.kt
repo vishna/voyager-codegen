@@ -5,6 +5,7 @@ import dev.vishna.patrol.*
 import dev.vishna.voyager.codegen.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 
 fun main(args: CommandArgs) = args.patrol {
@@ -19,17 +20,23 @@ fun main(args: CommandArgs) = args.patrol {
         "Code generation utility for the Voyager project."
     }
 
-    onInspection { scope, watchPoint, dryRun ->
+    onInspection { scope, watchPoint, dryRun, runOnce ->
         scope.launch {
-            generateVoyagerPaths(
+            generateCode(
                 name = watchPoint.name,
                 source = watchPoint.source,
                 target = requireNotNull(watchPoint["target"] as String?) { "target value not provided in $watchPoint" },
+                testTarget = watchPoint["testTarget"] as String?,
                 dryRun = dryRun
             )
         }.apply {
             inspectionJobs[watchPoint.name]?.cancel()
             inspectionJobs[watchPoint.name] = this
+            if (runOnce) {
+                runBlocking {
+                    join()
+                }
+            }
         }
     }
 

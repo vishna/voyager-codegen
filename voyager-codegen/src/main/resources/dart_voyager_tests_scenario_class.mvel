@@ -1,0 +1,10 @@
+@experimental
+class @{scenarioClassName} extends @{baseScenarioClassName} {
+  @foreach{param : params()}final String @{param};@end{'\n'}
+
+  @{scenarioClassName}.write(@foreach{param : params()}this.@{param},@end{} widgetTesterCallback, {String description = ""}) : super(description, widgetTesterCallback);
+
+  String path() {
+    return @{resolver.testPathExpression(routerPath)};
+  }
+}
