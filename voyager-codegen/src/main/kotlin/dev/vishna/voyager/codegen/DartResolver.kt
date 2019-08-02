@@ -1,12 +1,11 @@
-package com.eyeem.routerconstants
+package dev.vishna.voyager.codegen
 
 import dev.vishna.kmnd.execute
 import dev.vishna.kmnd.weaveToBlocking
 import dev.vishna.mvel.interpolate
 import dev.vishna.stringcode.asResource
 import dev.vishna.stringcode.camelize
-import dev.vishna.voyager.codegen.dartVoyagerTestScenarioClass
-import dev.vishna.voyager.codegen.dartVoyagerTestScenarioExecutionBlock
+import dev.vishna.voyager.codegen.model.RouterPath
 import dev.vishna.voyager.codegen.model.ScenarioClassName
 import kotlinx.coroutines.coroutineScope
 import java.io.ByteArrayOutputStream

@@ -1,4 +1,4 @@
-package com.eyeem.routerconstants
+package dev.vishna.voyager.codegen.model
 
 data class RouterPath(
         val path : String,

@@ -1,7 +1,6 @@
 package dev.vishna.voyager.codegen.model
 
-import com.eyeem.routerconstants.LangResolver
-import com.eyeem.routerconstants.RouterPath
+import dev.vishna.voyager.codegen.LangResolver
 import dev.vishna.stringcode.camelize
 
 class ScenarioClassName(

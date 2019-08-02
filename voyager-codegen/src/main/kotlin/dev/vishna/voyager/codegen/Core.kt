@@ -1,9 +1,7 @@
 package dev.vishna.voyager.codegen
 
 
-import com.eyeem.routerconstants.DartResolver
-import com.eyeem.routerconstants.RouterPath
-import com.eyeem.routerconstants.dartfmt
+import dev.vishna.voyager.codegen.model.RouterPath
 import dev.vishna.emojilog.std.*
 import dev.vishna.mvel.interpolate
 import dev.vishna.stringcode.asResource

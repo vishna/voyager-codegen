@@ -1,5 +1,6 @@
-package com.eyeem.routerconstants
+package dev.vishna.voyager.codegen
 
+import dev.vishna.voyager.codegen.model.RouterPath
 import dev.vishna.voyager.codegen.model.ScenarioClassName
 
 open class LangResolver {
