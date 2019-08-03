@@ -31,5 +31,5 @@ artifacts {
 
 dependencies {
     compile(project(":voyager-codegen"))
-    compile("com.github.vishna:patrol:master-SNAPSHOT")
+    compile("com.github.vishna:patrol:0.0.3")
 }
