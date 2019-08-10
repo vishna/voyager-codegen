@@ -10,6 +10,7 @@ import dev.vishna.stringcode.camelize
 import dev.vishna.voyager.codegen.model.RouterPath
 import dev.vishna.voyager.codegen.model.ScenarioClassName
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.lang.IllegalStateException
@@ -63,11 +64,27 @@ class DartResolver : LangResolver() {
     }
 }
 
+// this tries to figure out where dartfmt command is
+private val dartfmt by lazy {
+    var command : List<String> = listOf("dartfmt", "--help")
+    runBlocking {
+        try {
+            val outputStream = ByteArrayOutputStream()
+            command.execute { inuputStream ->
+                inuputStream weaveToBlocking outputStream
+            }
+        } catch (t: IOException) {
+            command = listOf("/bin/sh", "-c", "dartfmt")
+        }
+    }
+    command
+}
+
 suspend fun String.dartfmt() : String = coroutineScope {
     // TODO add some sort of LRU cache for this
     try {
         val dartOutputStream = ByteArrayOutputStream()
-        val result = listOf("dartfmt").execute { outputStream, inputStream, errorStream ->
+        val result = dartfmt.execute { outputStream, inputStream, errorStream ->
 
             outputStream.use {
                 this@dartfmt weaveToBlocking outputStream
