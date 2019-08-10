@@ -1,6 +1,7 @@
 package dev.vishna.voyager.codegen
 
 
+import dev.vishna.dartfmt.dartfmt
 import dev.vishna.voyager.codegen.model.RouterPath
 import dev.vishna.emojilog.std.*
 import dev.vishna.mvel.interpolate
