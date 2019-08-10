@@ -13,7 +13,7 @@ import java.io.File
 import java.lang.IllegalStateException
 import java.util.*
 
-private val log by lazy { defaultLogger() }
+internal val log by lazy { defaultLogger() }
 
 /**
  * Template for the router paths
