@@ -1,9 +1,10 @@
 @experimental
 class @{scenarioClassName} extends @{baseScenarioClassName} {
+  @{scenarioClassName}.write(@foreach{param : params()}this.@{param},@end{} WidgetTesterCallback widgetTesterCallback, {String description = "", dynamic argument}) : super(description, widgetTesterCallback, argument: argument);
+
   @foreach{param : params()}final String @{param};@end{'\n'}
 
-  @{scenarioClassName}.write(@foreach{param : params()}this.@{param},@end{} widgetTesterCallback, {String description = ""}) : super(description, widgetTesterCallback);
-
+  @override
   String path() {
     return @{resolver.testPathExpression(routerPath)};
   }

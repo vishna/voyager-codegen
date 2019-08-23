@@ -24,7 +24,20 @@ void _testVoyagerWidget(
 
       expect(router, isInstanceOf<RouterNG>());
 
-      Widget widget = VoyagerWidget(path: scenario.path(), router: router);
+      VoyagerArgument argument;
+
+      if (scenario.argument != null) {
+        if (scenario.argument is VoyagerArgument) {
+          argument = scenario.argument;
+        } else {
+          argument = VoyagerArgument(scenario.argument);
+        }
+      }
+
+      var widget = scenario.argument == null
+          ? VoyagerWidget(path: scenario.path(), router: router)
+          : VoyagerStatelessWidget(
+              path: scenario.path(), router: router, argument: argument, useCache: true);
       widget = widgetWrapper != null ? widgetWrapper(widget) : widget;
       widget = scenario.widgetWrapper != null ? scenario.widgetWrapper(widget) : widget;
 
@@ -41,11 +54,12 @@ void _testVoyagerWidget(
 
 @experimental
 abstract class @{baseScenarioClassName} {
+  @{baseScenarioClassName}(this.testDescription, this.widgetTesterCallback, {this.argument});
+
   final String testDescription;
   final WidgetTesterCallback widgetTesterCallback;
+  final dynamic argument;
   WidgetWrapper widgetWrapper;
-
-  @{baseScenarioClassName}(this.testDescription, this.widgetTesterCallback);
 
   String path();
   void addWidgetWrapper(WidgetWrapper widgetWrapper) {
@@ -57,9 +71,8 @@ abstract class @{baseScenarioClassName} {
 
 @experimental
 abstract class @{baseScenarioClassName}s {
+  const @{baseScenarioClassName}s(this.defaultWrapper);
   final WidgetWrapper defaultWrapper;
-
-  @{baseScenarioClassName}s(this.defaultWrapper);
 
   @foreach{scenarioClass : scenarioClasses}List<@{scenarioClass.scenarioClassName}> @{scenarioClass.type()}Scenarios();@end{'\n'}
 }
