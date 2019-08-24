@@ -4,6 +4,6 @@ if (forceTests) {
   assert(@{type()}Scenarios.isNotEmpty, "@{type()}Scenarios must return at least one test scenario");
 }
 @{type()}Scenarios?.asMap()?.forEach((index, scenario) {
-  _testVoyagerWidget("@{type()} scenario $index: path=@{'$'}{scenario.path()} @{'$'}{scenario.testDescription}", router,
-      testScenarios.defaultWrapper, scenario);
+  _testVoyagerWidget<T>("@{type()} scenario $index: path=@{'$'}{scenario.path()} @{'$'}{scenario.testDescription}", router,
+      testScenarios.defaultWrapper, testScenarios, scenario);
 });
