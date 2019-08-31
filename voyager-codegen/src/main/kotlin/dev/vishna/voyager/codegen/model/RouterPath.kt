@@ -2,7 +2,8 @@ package dev.vishna.voyager.codegen.model
 
 data class RouterPath(
         val path : String,
-        val type : String
+        val type : String,
+        val config : Map<String, *>?
 ) {
     val params: List<String> = path
             .split("/")

@@ -1,9 +1,16 @@
 package dev.vishna.voyager.codegen
 
+import dev.vishna.emojilog.android.warn
 import dev.vishna.stringcode.asResource
+import dev.vishna.voyager.codegen.model.RouterPath
 import kotlinx.coroutines.runBlocking
 import org.amshove.kluent.`should be equal to`
+import org.everit.json.schema.Schema
+import org.everit.json.schema.ValidationException
 import org.junit.Test
+import org.everit.json.schema.loader.SchemaLoader
+import org.json.JSONObject
+
 
 /**
  * test_1.yaml is copied from https://github.com/vishna/voyager/tree/7f99fe1d9f3ae30ff9bd02343bd510b42b839700/example/lib
@@ -48,4 +55,43 @@ class CoreTest {
         generatedTargetDart `should be equal to` targetDart
     }
 
+    @Test
+    fun validateRectangleYamlPOC() = runBlocking<Unit> {
+        val rectangle = "/rectangle.yaml".asResource().asJsonFromYaml()
+        val loader = SchemaLoader.builder()
+            .schemaJson("/rectangle_schema.yaml".asResource().asJsonFromYaml())
+            .draftV7Support()
+            .build()
+        val schema = loader.load().build()
+        try {
+            schema.validate(rectangle)
+        } catch (t: ValidationException) {
+            // prints #/rectangle/a: -5.0 is not higher or equal to 0
+            println(t.allMessages)
+        }
+    }
+
+    @Test
+    fun validateYaml() {
+        // TEST DATA
+        val voyagerYaml = "/test_2.yaml".asResource().asYaml()
+        val voyagerCodegen = "/voyager-codegen-test_2.yaml".asResource().asYamlArray().first() as Map<String, *>
+
+        // VALIDATION ROUTINE
+        val globalDefinitions = voyagerCodegen["definitions"] as? Map<String, Any>
+        val schema = voyagerCodegen["schema"] as Map<String, Map<String, *>>
+
+        val output = validateVoyagerPaths(voyagerYaml, schema, globalDefinitions)
+
+        // VALIDATION ERRORS
+        output.errors.forEach { error ->
+            log.warn..error
+        }
+    }
 }
+
+
+
+
+
+

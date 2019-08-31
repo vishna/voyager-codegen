@@ -7,6 +7,7 @@ kotlinProject()
 
 dependencies {
     compile("org.yaml:snakeyaml:1.8")
+    compile("com.github.everit-org.json-schema:org.everit.json.schema:1.11.1")
     compile("com.github.vishna:mvel-ktx:master-SNAPSHOT")
     compile("com.github.vishna:string-code-ktx:master-SNAPSHOT")
     compile("com.github.vishna:watchservice-ktx:master-SNAPSHOT")

@@ -5,13 +5,15 @@ import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' as test_package;
 import 'package:voyager/voyager.dart';
 
-typedef WidgetWrapper = Widget Function(Widget nonWrappedWidget);
+typedef WidgetWrapper<T extends VoyagerTestScenarios> = Widget Function(
+    Widget nonWrappedWidget, RouterNG router, T scenarios);
 
 @isTest
-void _testVoyagerWidget(
+void _testVoyagerWidget<T extends VoyagerTestScenarios>(
   String description,
   Future<RouterNG> routerFuture,
   WidgetWrapper widgetWrapper,
+  T scenarios,
   VoyagerTestScenario scenario, {
   bool skip = false,
   test_package.Timeout timeout,
@@ -19,21 +21,38 @@ void _testVoyagerWidget(
   bool semanticsEnabled = false,
 }) {
   testWidgets(description, (WidgetTester tester) async {
+    RouterNG router;
     await tester.runAsync(() async {
-      final router = await routerFuture;
-
-      expect(router, isInstanceOf<RouterNG>());
-
-      Widget widget = VoyagerWidget(path: scenario.path(), router: router);
-      widget = widgetWrapper != null ? widgetWrapper(widget) : widget;
-      widget = scenario.widgetWrapper != null
-          ? scenario.widgetWrapper(widget)
-          : widget;
-
-      await tester.pumpWidget(widget);
-
-      scenario.widgetTesterCallback(tester);
+      router = await routerFuture;
+      expect(router, isNotNull);
     });
+
+    VoyagerArgument argument;
+
+    if (scenario.argument != null) {
+      if (scenario.argument is VoyagerArgument) {
+        argument = scenario.argument;
+      } else {
+        argument = VoyagerArgument(scenario.argument);
+      }
+    }
+
+    var widget = scenario.argument == null
+        ? VoyagerWidget(path: scenario.path(), router: router)
+        : VoyagerStatelessWidget(
+            path: scenario.path(),
+            router: router,
+            argument: argument,
+            useCache: true);
+    widget = widgetWrapper != null
+        ? widgetWrapper(widget, router, scenarios)
+        : widget;
+    widget = scenario.widgetWrapper != null
+        ? scenario.widgetWrapper(widget, router, scenarios)
+        : widget;
+
+    await tester.pumpWidget(widget);
+    await scenario.widgetTesterCallback(tester);
   },
       skip: skip,
       timeout: timeout,
@@ -43,11 +62,13 @@ void _testVoyagerWidget(
 
 @experimental
 abstract class VoyagerTestScenario {
+  VoyagerTestScenario(this.testDescription, this.widgetTesterCallback,
+      {this.argument});
+
   final String testDescription;
   final WidgetTesterCallback widgetTesterCallback;
+  final dynamic argument;
   WidgetWrapper widgetWrapper;
-
-  VoyagerTestScenario(this.testDescription, this.widgetTesterCallback);
 
   String path();
   void addWidgetWrapper(WidgetWrapper widgetWrapper) {
@@ -57,9 +78,11 @@ abstract class VoyagerTestScenario {
 
 @experimental
 class VoyagerTestHomeScenario extends VoyagerTestScenario {
-  VoyagerTestHomeScenario.write(widgetTesterCallback, {String description = ""})
-      : super(description, widgetTesterCallback);
+  VoyagerTestHomeScenario.write(WidgetTesterCallback widgetTesterCallback,
+      {String description = "", dynamic argument})
+      : super(description, widgetTesterCallback, argument: argument);
 
+  @override
   String path() {
     return "/home";
   }
@@ -67,12 +90,14 @@ class VoyagerTestHomeScenario extends VoyagerTestScenario {
 
 @experimental
 class VoyagerTestOtherScenario extends VoyagerTestScenario {
+  VoyagerTestOtherScenario.write(
+      this.title, WidgetTesterCallback widgetTesterCallback,
+      {String description = "", dynamic argument})
+      : super(description, widgetTesterCallback, argument: argument);
+
   final String title;
 
-  VoyagerTestOtherScenario.write(this.title, widgetTesterCallback,
-      {String description = ""})
-      : super(description, widgetTesterCallback);
-
+  @override
   String path() {
     return "/other/$title";
   }
@@ -80,9 +105,11 @@ class VoyagerTestOtherScenario extends VoyagerTestScenario {
 
 @experimental
 class VoyagerTestFabScenario extends VoyagerTestScenario {
-  VoyagerTestFabScenario.write(widgetTesterCallback, {String description = ""})
-      : super(description, widgetTesterCallback);
+  VoyagerTestFabScenario.write(WidgetTesterCallback widgetTesterCallback,
+      {String description = "", dynamic argument})
+      : super(description, widgetTesterCallback, argument: argument);
 
+  @override
   String path() {
     return "/fab";
   }
@@ -90,9 +117,8 @@ class VoyagerTestFabScenario extends VoyagerTestScenario {
 
 @experimental
 abstract class VoyagerTestScenarios {
+  const VoyagerTestScenarios(this.defaultWrapper);
   final WidgetWrapper defaultWrapper;
-
-  VoyagerTestScenarios(this.defaultWrapper);
 
   List<VoyagerTestHomeScenario> homeScenarios();
   List<VoyagerTestOtherScenario> otherScenarios();
@@ -101,8 +127,8 @@ abstract class VoyagerTestScenarios {
 
 @isTestGroup
 @experimental
-void voyagerAutomatedTests(String description, Future<RouterNG> router,
-    VoyagerTestScenarios testScenarios,
+void voyagerAutomatedTests<T extends VoyagerTestScenarios>(String description,
+    Future<RouterNG> router, VoyagerTestScenarios testScenarios,
     {bool forceTests = true}) {
   group(description, () {
     final homeScenarios = testScenarios.homeScenarios();
@@ -113,10 +139,11 @@ void voyagerAutomatedTests(String description, Future<RouterNG> router,
           "homeScenarios must return at least one test scenario");
     }
     homeScenarios?.asMap()?.forEach((index, scenario) {
-      _testVoyagerWidget(
+      _testVoyagerWidget<T>(
           "home scenario $index: path=${scenario.path()} ${scenario.testDescription}",
           router,
           testScenarios.defaultWrapper,
+          testScenarios,
           scenario);
     });
     final otherScenarios = testScenarios.otherScenarios();
@@ -127,10 +154,11 @@ void voyagerAutomatedTests(String description, Future<RouterNG> router,
           "otherScenarios must return at least one test scenario");
     }
     otherScenarios?.asMap()?.forEach((index, scenario) {
-      _testVoyagerWidget(
+      _testVoyagerWidget<T>(
           "other scenario $index: path=${scenario.path()} ${scenario.testDescription}",
           router,
           testScenarios.defaultWrapper,
+          testScenarios,
           scenario);
     });
     final fabScenarios = testScenarios.fabScenarios();
@@ -140,10 +168,11 @@ void voyagerAutomatedTests(String description, Future<RouterNG> router,
           "fabScenarios must return at least one test scenario");
     }
     fabScenarios?.asMap()?.forEach((index, scenario) {
-      _testVoyagerWidget(
+      _testVoyagerWidget<T>(
           "fab scenario $index: path=${scenario.path()} ${scenario.testDescription}",
           router,
           testScenarios.defaultWrapper,
+          testScenarios,
           scenario);
     });
   });

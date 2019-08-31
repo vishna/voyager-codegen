@@ -1,0 +1,31 @@
+---
+'/home' :
+  type: 'home'
+  screen: PageWidgetto
+  title: "This is Home"
+  body: "Hello World"
+  fabPath: /fab
+'/other/:title' :
+  type: 'other'
+  screen: PageWidget
+  body: "Welcome to the other side"
+  title: "This is %{title}"
+  bloc:
+    - RequestManagerBloc:
+        path: '/1.1/statuses/home_timeline.json'
+        jsonpath: statuses
+        listOf: Tweet
+    - DataCoordinatorBloc
+'/fab' :
+  type: fab
+  screen: FabWidget
+  target: /other/thing
+  icon: e88f # check icons.dart for reference
+  rectangle:
+    a: 5
+    b: -5
+  tabs:
+    - /one
+    - /two
+    - /three
+    - /four

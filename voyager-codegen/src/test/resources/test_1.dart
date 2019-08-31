@@ -1,4 +1,5 @@
 /// Generated file, DO NOT EDIT
+
 class VoyagerPaths {
   static const String pathHome = "/home";
   static const String typeHome = "home";

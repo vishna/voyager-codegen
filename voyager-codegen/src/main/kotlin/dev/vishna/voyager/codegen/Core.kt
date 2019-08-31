@@ -2,6 +2,7 @@ package dev.vishna.voyager.codegen
 
 
 import dev.vishna.dartfmt.dartfmt
+import dev.vishna.emojilog.android.warn
 import dev.vishna.voyager.codegen.model.RouterPath
 import dev.vishna.emojilog.std.*
 import dev.vishna.mvel.interpolate
@@ -37,6 +38,11 @@ const val dartVoyagerTestScenarioClass: ResourcePath = "/dart_voyager_tests_scen
 const val dartVoyagerTestScenarioExecutionBlock: ResourcePath = "/dart_voyager_tests_scenario_execution_block.mvel"
 
 /**
+ * Template for the automated scenario execution block
+ */
+const val dartVoyagerDataClass: ResourcePath = "/dart_voyager_data_class.mvel"
+
+/**
  * Initial template this tool consumes
  */
 const val voyagerCodegen: ResourcePath = "/voyager-codegen.yaml"
@@ -50,7 +56,16 @@ fun bootstrapVoyagerPatrolConfig(patrolFile: File) = if (File(pwd, "pubspec.yaml
     false
 }
 
-suspend fun generateCode(name: String, source: String, target: String, testTarget: String?, dryRun: Boolean) = supervisorScope {
+suspend fun generateCode(
+    name: String,
+    source: String,
+    target: String,
+    testTarget: String?,
+    definitions: Map<String, Any>?,
+    schema: Map<String, Map<String, *>>?,
+    dryRun: Boolean,
+    runOnce: Boolean
+) = supervisorScope {
 
     if (source.isBlank()) {
         throw IllegalStateException("No source value provided for $name")
@@ -71,18 +86,44 @@ suspend fun generateCode(name: String, source: String, target: String, testTarge
         else -> throw IllegalStateException("Unsupported file extension ${voyagerFile.extension}")
     }.asYaml()
 
+    val validationResult = if (schema != null) {
+        val validationOutput = validateVoyagerPaths(voyagerYaml, schema, definitions)
+        validationOutput.errors.forEach { error ->
+            log.warn..error
+        }
+
+        if (runOnce && validationOutput.errors.isNotEmpty()) {
+            log.boom.."${validationOutput.errors.size} validation error(s) found. Exiting."
+            System.exit(1)
+            return@supervisorScope
+        }
+
+        if (validationOutput.errors.isEmpty()) {
+            log.success.."Schema validated properly"
+        }
+        validationOutput
+    } else {
+        null
+    }
+
     val routerPaths = voyagerYaml.asRouterPaths()
 
     val jobs = mutableListOf<Job>()
-    jobs += async { generateVoyagerPaths(name, routerPaths, target, dryRun) }
+    jobs += async { generateVoyagerPaths(name, routerPaths, target, dryRun, validationResult) }
     if (!testTarget.isNullOrBlank()) {
         jobs += async { generateVoyagerTests(name, routerPaths, testTarget, dryRun) }
     }
     jobs.forEach { it.join() }
 }
 
-suspend fun generateVoyagerPaths(name: String, routerPaths: List<RouterPath>, target: String, dryRun: Boolean) {
-    toPathsDart(name, routerPaths)
+suspend fun generateVoyagerPaths(
+    name: String,
+    routerPaths: List<RouterPath>,
+    target: String,
+    dryRun: Boolean,
+    validationResult: ValidationResult?
+) {
+    toPathsDart(name, routerPaths, validationResult)
         ?.saveToTarget(target, dryRun)
 }
 
@@ -120,22 +161,45 @@ fun Map<String, Map<String, *>>.asRouterPaths(): List<RouterPath> = keys
     .map {
         RouterPath(
             path = it,
-            type = this[it]?.get("type")?.toString() ?: ""
+            type = this[it]?.get("type")?.toString() ?: "",
+            config = this[it]
         )
     }.filter { it.path.isNotBlank() }
 
-internal suspend fun toPathsDart(name: String, routerPaths: List<RouterPath>): String? {
-    // calculate the template
-    return dartVoyagerPathsClass
-        .asResource()
-        .interpolate(
-            mapOf(
-                "resolver" to DartResolver(),
-                "name" to name,
-                "paths" to routerPaths
+internal suspend fun toPathsDart(
+    name: String,
+    routerPaths: List<RouterPath>,
+    validationResult: ValidationResult? = null
+): String? {
+    var data : VoyagerDataClassEmitter? = null
+    val imports = mutableListOf<String>()
+    val outputsCount = validationResult?.validators?.mapNotNull { it.output }?.size ?: 0
+    if (outputsCount > 0 && validationResult != null) {
+        imports += validationResult.validators.mapNotNull { it.import }
+        imports += "package:voyager/voyager.dart"
+        imports += "package:provider/provider.dart"
+        data = VoyagerDataClassEmitter(name = name, validationResult = validationResult)
+    }
+
+    val generatedDart = try {
+        dartVoyagerPathsClass
+            .asResource()
+            .interpolate(
+                mapOf(
+                    "resolver" to DartResolver(),
+                    "name" to name,
+                    "paths" to routerPaths,
+                    "imports" to imports.distinctBy { it }.sortedBy { it },
+                    "data" to data
+                )
             )
-        )
-        ?.dartfmt()
+    } catch (t: Throwable) {
+        log.boom..t
+        throw t
+    }
+
+    // calculate the template
+    return generatedDart?.dartfmt()
 }
 
 internal suspend fun toTestScenariosDart(name: String, routerPaths: List<RouterPath>): String? {
