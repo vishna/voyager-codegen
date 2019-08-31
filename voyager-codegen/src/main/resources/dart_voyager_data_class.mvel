@@ -1,0 +1,18 @@
+class @{name}Data {
+  @{name}Data(this.voyager);
+  final Voyager voyager;
+
+  String get type => voyager.type;
+  @foreach{field : fields}@{field.type} get @{field.name} => voyager["@{field.name}"];@end{'\n'}
+
+  // ignore: prefer_constructors_over_static_methods
+  static @{name}Data of(BuildContext context) {
+    final voyager = Provider.of<Voyager>(context);
+    @{name}Data data = voyager.storage["@{name}Data"];
+    if (data == null) {
+      data = @{name}Data(voyager);
+      voyager.storage["@{name}Data"] = data;
+    }
+    return data;
+  }
+}

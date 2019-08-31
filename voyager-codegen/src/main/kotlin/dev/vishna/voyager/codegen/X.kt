@@ -1,9 +1,14 @@
 package dev.vishna.voyager.codegen
 
+import dev.vishna.emojilog.Log
+import org.json.JSONObject
 import org.yaml.snakeyaml.Yaml
 import java.io.*
 
 internal fun String.asYaml() :  Map<String, Map<String, *>> = Yaml().load(StringReader(this)) as Map<String, Map<String, *>>
+internal fun String.asYamlArray() :  List<*> = Yaml().load(StringReader(this)) as List<*>
+internal fun String.asJson() : JSONObject = JSONObject(this)
+internal fun String.asJsonFromYaml() = JSONObject(asYaml())
 
 typealias ResourcePath = String
 
@@ -24,3 +29,6 @@ internal fun FilePath.asFile() : File {
         File(pwd, this)
     }
 }
+
+val Log.success
+    get() = { "✅" } lvl "success"

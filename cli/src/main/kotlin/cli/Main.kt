@@ -27,7 +27,10 @@ fun main(args: CommandArgs) = args.patrol {
                 source = watchPoint.source,
                 target = requireNotNull(watchPoint["target"] as String?) { "target value not provided in $watchPoint" },
                 testTarget = watchPoint["testTarget"] as String?,
-                dryRun = dryRun
+                schema = watchPoint["schema"] as Map<String, Map<String, *>>?,
+                definitions = watchPoint["definitions"] as Map<String, Any>?,
+                dryRun = dryRun,
+                runOnce = runOnce
             )
         }.apply {
             inspectionJobs[watchPoint.name]?.cancel()

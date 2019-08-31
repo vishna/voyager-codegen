@@ -1,5 +1,13 @@
 /// Generated file, DO NOT EDIT
+@foreach{i : imports}import '@{i}';@end{'\n'}
+
 class @{name}Paths {
 @foreach{path : paths}  @{resolver.pathExpression(path)}
   @{resolver.typeExpression(path)}@end{'\n'}
 }
+
+@{if(data != null) {
+  data.emit()
+} else {
+  ""
+}}

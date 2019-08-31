@@ -1,0 +1,43 @@
+---
+screen:
+  import: "package:voyager/voyager.dart"
+  output: WidgetBuilder
+  input:
+    type: string
+    enum: ["PageWidget", "FabWidget"]
+title:
+  output: String
+  input:
+    type: string
+body:
+  output: String
+  input:
+    type: string
+target:
+  output: String
+  input:
+    type: string
+icon:
+  import: "package:flutter/material.dart"
+  ouput: Icon
+  input:
+    type: string
+rectangle:
+  output: Rect
+  input:
+    definitions:
+      size:
+        type: number
+        minimum: 0
+    type: object
+    properties:
+      a:
+        $ref: "#/definitions/size"
+      b:
+        $ref: "#/definitions/size"
+tabs:
+  output: List<String>
+  input:
+    type: array
+    items:
+      type: string
