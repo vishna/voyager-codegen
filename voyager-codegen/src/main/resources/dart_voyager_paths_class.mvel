@@ -11,3 +11,5 @@ class @{name}Paths {
 } else {
   ""
 }}
+
+@foreach{stub : stubs}@{stub.emit()}@end{'\n'}

@@ -38,9 +38,14 @@ const val dartVoyagerTestScenarioClass: ResourcePath = "/dart_voyager_tests_scen
 const val dartVoyagerTestScenarioExecutionBlock: ResourcePath = "/dart_voyager_tests_scenario_execution_block.mvel"
 
 /**
- * Template for the automated scenario execution block
+ * Template for the "strong-typed" voyager
  */
 const val dartVoyagerDataClass: ResourcePath = "/dart_voyager_data_class.mvel"
+
+/**
+ * Template for the plugin stub
+ */
+const val dartVoyagerPluginStub: ResourcePath = "/dart_voyager_plugin_stub.mvel"
 
 /**
  * Initial template this tool consumes
@@ -174,11 +179,13 @@ internal suspend fun toPathsDart(
     var data : VoyagerDataClassEmitter? = null
     val imports = mutableListOf<String>()
     val outputsCount = validationResult?.validators?.mapNotNull { it.output }?.size ?: 0
+    var stubs = emptyList<PluginStubClassEmitter>()
     if (outputsCount > 0 && validationResult != null) {
         imports += validationResult.validators.mapNotNull { it.import }
         imports += "package:voyager/voyager.dart"
         imports += "package:provider/provider.dart"
         data = VoyagerDataClassEmitter(name = name, validationResult = validationResult)
+        stubs = validationResult.validators.filter { it.pluginStub }.map { PluginStubClassEmitter(it) }
     }
 
     val generatedDart = try {
@@ -190,7 +197,8 @@ internal suspend fun toPathsDart(
                     "name" to name,
                     "paths" to routerPaths,
                     "imports" to imports.distinctBy { it }.sortedBy { it },
-                    "data" to data
+                    "data" to data,
+                    "stubs" to stubs
                 )
             )
     } catch (t: Throwable) {

@@ -2,6 +2,7 @@ package dev.vishna.voyager.codegen
 
 import dev.vishna.mvel.interpolate
 import dev.vishna.stringcode.asResource
+import dev.vishna.stringcode.camelize
 import dev.vishna.voyager.codegen.model.RouterPath
 import org.everit.json.schema.Schema
 import org.everit.json.schema.ValidationException
@@ -16,7 +17,8 @@ class PluginValidator(
     val pluginNode: String,
     val output: String?,
     val import: String?,
-    val input: Schema
+    val input: Schema,
+    val pluginStub: Boolean
 )
 
 sealed class PluginError(
@@ -65,7 +67,8 @@ fun validateVoyagerPaths(
             pluginNode = pluginNode,
             import = validation["import"] as String?,
             output = validation["output"] as String?,
-            input = compiledSchema
+            input = compiledSchema,
+            pluginStub = validation["pluginStub"] as? Boolean ?: false
         )
     }.associateBy({ it.pluginNode }, { it })
 
@@ -178,4 +181,14 @@ class VoyagerDataClassEmitter(val name: String, val validationResult: Validation
     ) { "interpolation result for $name was null" }
 
     data class Field(val name: String, val type: String)
+}
+
+class PluginStubClassEmitter(val validator: PluginValidator) {
+    fun emit() : String = dartVoyagerPluginStub.asResource().interpolate(
+        mapOf(
+            "className" to "${validator.pluginNode.camelize()}PluginStub",
+            "outputClass" to validator.output,
+            "nodeName" to validator.pluginNode
+        )
+    )!!
 }
