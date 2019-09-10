@@ -183,7 +183,6 @@ internal suspend fun toPathsDart(
     if (outputsCount > 0 && validationResult != null) {
         imports += validationResult.validators.mapNotNull { it.import }
         imports += "package:voyager/voyager.dart"
-        imports += "package:provider/provider.dart"
         data = VoyagerDataClassEmitter(name = name, validationResult = validationResult)
         stubs = validationResult.validators.filter { it.pluginStub }.map { PluginStubClassEmitter(it) }
     }

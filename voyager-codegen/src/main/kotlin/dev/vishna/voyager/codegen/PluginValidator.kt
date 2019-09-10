@@ -175,6 +175,7 @@ class VoyagerDataClassEmitter(val name: String, val validationResult: Validation
         dartVoyagerDataClass.asResource().interpolate(
             mapOf(
                 "name" to name,
+                "nameDecap" to name.decapitalize(),
                 "fields" to fields
             )
         )
