@@ -5,6 +5,10 @@ class @{name}Data extends Voyager {
   @foreach{field : fields}@{field.type} get @{field.name} => this["@{field.name}"];@end{'\n'}
 }
 
+class VoyagerProvider {
+  static @{name}Data of(BuildContext context) => Provider.of<Voyager>(context);
+}
+
 @{name}Data @{nameDecap}DataFactory(
         AbstractRouteContext abstractContext, Map<String, dynamic> config) =>
     @{name}Data(
