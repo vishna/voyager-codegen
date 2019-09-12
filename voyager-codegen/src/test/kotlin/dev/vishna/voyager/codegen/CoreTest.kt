@@ -1,15 +1,13 @@
 package dev.vishna.voyager.codegen
 
-import dev.vishna.emojilog.android.warn
 import dev.vishna.stringcode.asResource
-import dev.vishna.voyager.codegen.model.RouterPath
 import kotlinx.coroutines.runBlocking
+import org.amshove.kluent.`should be empty`
 import org.amshove.kluent.`should be equal to`
-import org.everit.json.schema.Schema
+import org.amshove.kluent.shouldBeEqualTo
 import org.everit.json.schema.ValidationException
 import org.junit.Test
 import org.everit.json.schema.loader.SchemaLoader
-import org.json.JSONObject
 
 
 /**
@@ -83,10 +81,39 @@ class CoreTest {
 
         val output = validateVoyagerPaths(voyagerYaml, schema, globalDefinitions)
 
-        // VALIDATION ERRORS
-        output.errors.forEach { error ->
-            log.warn..error
-        }
+        output.errors.size `should be equal to` 4
+    }
+
+    @Test
+    fun validateYamlPlusSpecialKeys() = runBlocking<Unit> {
+        // TEST DATA
+        val voyagerYaml = "/test_3.yaml".asResource().asYaml()
+        val voyagerCodegen = "/test_3_validation.yaml".asResource().asYamlArray().first() as Map<String, *>
+
+        // VALIDATION ROUTINE
+        val globalDefinitions = voyagerCodegen["definitions"] as? Map<String, Any>
+        val schema = voyagerCodegen["schema"] as Map<String, Map<String, *>>
+
+        val validationResult = validateVoyagerPaths(voyagerYaml, schema, globalDefinitions)
+
+        validationResult.errors.`should be empty`()
+
+        val generatedTargetDart = toPathsDart(
+            name = "Voyager",
+            routerPaths = voyagerYaml.asRouterPaths(),
+            validationResult = validationResult
+        )!!
+
+        generatedTargetDart `should be equal to` "/test_3.dart".asResource()
+    }
+
+    @Test
+    fun dartKeySanitization() {
+        "const".dartSanitize() shouldBeEqualTo "const_"
+        "Const".dartSanitize() shouldBeEqualTo "Const"
+        "foo".dartSanitize() shouldBeEqualTo "foo"
+        "class".dartSanitize() shouldBeEqualTo "class_"
+        "Class".dartSanitize() shouldBeEqualTo "Class"
     }
 }
 

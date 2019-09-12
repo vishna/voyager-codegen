@@ -181,7 +181,9 @@ class VoyagerDataClassEmitter(val name: String, val validationResult: Validation
         )
     ) { "interpolation result for $name was null" }
 
-    data class Field(val name: String, val type: String)
+    data class Field(val name: String, val type: String) {
+        val nameSanitized = name.dartSanitize()
+    }
 }
 
 class PluginStubClassEmitter(val validator: PluginValidator) {

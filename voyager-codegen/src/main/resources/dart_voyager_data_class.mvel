@@ -2,7 +2,7 @@ class @{name}Data extends Voyager {
   @{name}Data({String path, Voyager parent, Map<String, dynamic> config})
         : super(path: path, parent: parent, config: config);
 
-  @foreach{field : fields}@{field.type} get @{field.name} => this["@{field.name}"];@end{'\n'}
+  @foreach{field : fields}@{field.type} get @{field.nameSanitized} => this["@{field.name}"];@end{'\n'}
 }
 
 class VoyagerProvider {

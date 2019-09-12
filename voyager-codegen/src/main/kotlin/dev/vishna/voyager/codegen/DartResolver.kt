@@ -29,7 +29,7 @@ class DartResolver : LangResolver() {
     }
 
     private fun argsExpression(routerPath: RouterPath) : String {
-        val args = routerPath.params.map { "String $it" }.joinToString(separator = ",")
+        val args = routerPath.params.map { "String ${it.dartSanitize()}" }.joinToString(separator = ",")
 
         if (routerPath.params.size > 1) {
             return "{$args}"
@@ -39,7 +39,11 @@ class DartResolver : LangResolver() {
     }
 
     private fun interpolationExpression(routerPath: RouterPath) : String {
-        return routerPath.path.replace(":", "$")
+        var output = routerPath.path
+        routerPath.params.forEach {
+            output = output.replace(":$it", "$${it.dartSanitize()}")
+        }
+        return output
     }
 
     override fun typeExpression(routerPath: RouterPath): String {
