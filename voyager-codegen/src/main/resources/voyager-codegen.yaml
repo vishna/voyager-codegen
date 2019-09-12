@@ -5,6 +5,11 @@
   target: lib/gen/voyager_gen.dart
 # uncomment for automated widget test skeleton
 #  testTarget: test/gen/voyager_gen.dart
-# for schema validation, check example app and wiki:
-# definitions:
-# schema:
+# uncomment below for schema validation
+# for mote info check the example app (link below):
+# https://github.com/vishna/voyager/blob/master/example/voyager-codegen.yaml
+#  definitions:
+#  schema:
+#    widget:
+#      input:
+#        type: string
