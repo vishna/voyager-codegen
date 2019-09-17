@@ -12,9 +12,9 @@ class DartResolver : LangResolver() {
         val name = "path_${routerPath.type}".camelize(startWithLowerCase = true);
 
         if (routerPath.params.isEmpty()) {
-            return """static const String $name = "${routerPath.path}";"""
+            return """const String $name = "${routerPath.path}";"""
         } else {
-            return """static String $name(${argsExpression(routerPath)}) {
+            return """String $name(${argsExpression(routerPath)}) {
                 |    return "${interpolationExpression(routerPath)}";
                 |  }""".trimMargin()
         }
@@ -47,7 +47,7 @@ class DartResolver : LangResolver() {
     }
 
     override fun typeExpression(routerPath: RouterPath): String {
-        return """static const String ${"type_${routerPath.type}".camelize(startWithLowerCase = true)} = "${routerPath.type}";"""
+        return """const String ${"type_${routerPath.type}".camelize(startWithLowerCase = true)} = "${routerPath.type}";"""
     }
 
     override fun emit(scenarioClassName: ScenarioClassName): String {

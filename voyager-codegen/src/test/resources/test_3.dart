@@ -3,29 +3,27 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:voyager/voyager.dart';
 
-class VoyagerPaths {
-  static const String pathHome = "/home";
-  static const String typeHome = "home";
-  static String pathOther(String title) {
-    return "/other/$title";
-  }
-
-  static const String typeOther = "other";
-  static const String pathFab = "/fab";
-  static const String typeFab = "fab";
-  static const String pathList = "/list";
-  static const String typeList = "list";
-  static String pathObjectItem(String class_) {
-    return "/_object/$class_";
-  }
-
-  static const String typeObjectItem = "object_item";
-  static String pathSuper({String await_, String async_}) {
-    return "/keywords/$await_/$async_";
-  }
-
-  static const String typeSuper = "super";
+const String pathHome = "/home";
+const String typeHome = "home";
+String pathOther(String title) {
+  return "/other/$title";
 }
+
+const String typeOther = "other";
+const String pathFab = "/fab";
+const String typeFab = "fab";
+const String pathList = "/list";
+const String typeList = "list";
+String pathObjectItem(String class_) {
+  return "/_object/$class_";
+}
+
+const String typeObjectItem = "object_item";
+String pathSuper({String await_, String async_}) {
+  return "/keywords/$await_/$async_";
+}
+
+const String typeSuper = "super";
 
 class VoyagerData extends Voyager {
   VoyagerData({String path, Voyager parent, Map<String, dynamic> config})
