@@ -49,7 +49,8 @@ fun main(args: CommandArgs) = args.patrol {
                 definitions = definitions ?: watchPoint["definitions"] as Map<String, Any>?,
                 dryRun = dryRun,
                 runOnce = runOnce,
-                setExitIfChanged = scope.setExitIfChanged
+                setExitIfChanged = scope.setExitIfChanged,
+                `package` = watchPoint["package"] as String? ?: ""
             )
         }.apply {
             inspectionJobs[watchPoint.name]?.cancel()

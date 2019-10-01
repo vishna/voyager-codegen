@@ -70,7 +70,8 @@ suspend fun generateCode(
     schema: Map<String, Map<String, *>>?,
     dryRun: Boolean,
     runOnce: Boolean,
-    setExitIfChanged: Boolean
+    setExitIfChanged: Boolean,
+    `package`: String
 ) = supervisorScope {
 
     if (source.isBlank()) {
@@ -112,10 +113,10 @@ suspend fun generateCode(
         null
     }
 
-    val routerPaths = voyagerYaml.asRouterPaths()
+    val routerPaths = voyagerYaml.asRouterPaths().filter { it.`package` == `package` }
 
     val jobs = mutableListOf<Job>()
-    jobs += async { generateVoyagerPaths(name, routerPaths, target, dryRun, setExitIfChanged, validationResult) }
+    jobs += async { generateVoyagerPaths(name, routerPaths, target, dryRun, setExitIfChanged, validationResult, `package`) }
     if (!testTarget.isNullOrBlank()) {
         jobs += async { generateVoyagerTests(name, routerPaths, testTarget, dryRun, setExitIfChanged) }
     }
@@ -128,9 +129,10 @@ suspend fun generateVoyagerPaths(
     target: String,
     dryRun: Boolean,
     setExitIfChanged: Boolean,
-    validationResult: ValidationResult?
+    validationResult: ValidationResult?,
+    `package`: String
 ) {
-    toPathsDart(name, routerPaths, validationResult)
+    toPathsDart(name, routerPaths, validationResult, `package`)
         ?.saveToTarget(target, dryRun, setExitIfChanged)
 }
 
@@ -174,6 +176,7 @@ fun Map<String, Map<String, *>>.asRouterPaths(): List<RouterPath> = keys
         RouterPath(
             path = it,
             type = this[it]?.get("type")?.toString() ?: "",
+            `package` = this[it]?.get("package")?.toString() ?: "",
             config = this[it]
         )
     }.filter { it.path.isNotBlank() }
@@ -181,13 +184,14 @@ fun Map<String, Map<String, *>>.asRouterPaths(): List<RouterPath> = keys
 internal suspend fun toPathsDart(
     name: String,
     routerPaths: List<RouterPath>,
-    validationResult: ValidationResult? = null
+    validationResult: ValidationResult? = null,
+    `package`: String
 ): String? {
     var data : VoyagerDataClassEmitter? = null
     val imports = mutableListOf<String>()
     val outputsCount = validationResult?.validators?.mapNotNull { it.output }?.size ?: 0
     var stubs = emptyList<PluginStubClassEmitter>()
-    if (outputsCount > 0 && validationResult != null) {
+    if (outputsCount > 0 && validationResult != null && `package`.isNullOrBlank()) {
         imports += validationResult.validators.mapNotNull { it.import }
         imports += "package:voyager/voyager.dart"
         imports += "package:provider/provider.dart"

@@ -31,6 +31,9 @@ sealed class PluginError(
     class TypeNotSnakeCase(routerPath: RouterPath, typeValue: String) :
         PluginError("Type $typeValue must be snake_case", routerPath, "type")
 
+    class PackageNotSnakeCase(routerPath: RouterPath, packageValue: String) :
+        PluginError("Package $packageValue must be snake_case", routerPath, "package")
+
     class MissingPluginSchema(routerPath: RouterPath, pluginNode: String) :
         PluginError("No schema defined for plugin $pluginNode", routerPath, pluginNode)
 
@@ -88,6 +91,13 @@ fun validateVoyagerPaths(
                 val typeValue = config["type"]
                 if (typeValue !is String || !(typeValue matches SNAKE_CASE)) {
                     errors += PluginError.TypeNotSnakeCase(routerPath, typeValue.toString())
+                }
+                return@forEach
+            }
+            if (pluginNode == "package") {
+                val packageValue = config["package"]
+                if (packageValue !is String || !(packageValue matches SNAKE_CASE)) {
+                    errors += PluginError.PackageNotSnakeCase(routerPath, packageValue.toString())
                 }
                 return@forEach
             }
