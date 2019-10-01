@@ -4,8 +4,9 @@ import dev.vishna.emojilog.Log
 import org.json.JSONObject
 import org.yaml.snakeyaml.Yaml
 import java.io.*
+import java.util.concurrent.ConcurrentHashMap
 
-internal fun String.asYaml() :  Map<String, Map<String, *>> = Yaml().load(StringReader(this)) as Map<String, Map<String, *>>
+fun String.asYaml() :  Map<String, Map<String, *>> = Yaml().load(StringReader(this)) as Map<String, Map<String, *>>
 internal fun String.asYamlArray() :  List<*> = Yaml().load(StringReader(this)) as List<*>
 internal fun String.asJson() : JSONObject = JSONObject(this)
 internal fun String.asJsonFromYaml() = JSONObject(asYaml())
@@ -32,3 +33,19 @@ internal fun FilePath.asFile() : File {
 
 val Log.success
     get() = { "✅" } lvl "success"
+
+/**
+ * debounce code block with a given id
+ */
+@Synchronized
+fun debounced(id: String, time: Long = 300) : Boolean {
+    val now = System.currentTimeMillis()
+    val lastDebounce = debounceMap[id] ?: 0
+    if (now - lastDebounce > time) {
+        debounceMap[id] = now
+        return false
+    }
+    return true
+}
+
+private val debounceMap = ConcurrentHashMap<String, Long>()

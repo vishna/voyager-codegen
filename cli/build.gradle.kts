@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     dependencies {
@@ -32,4 +33,8 @@ artifacts {
 dependencies {
     compile(project(":voyager-codegen"))
     compile("com.github.vishna:patrol:0.0.5")
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }
