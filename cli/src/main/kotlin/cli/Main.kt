@@ -21,6 +21,7 @@ fun main(args: CommandArgs) = args.patrol {
     }
 
     onInspection { scope, watchPoint, dryRun, runOnce ->
+
         scope.launch {
             generateCode(
                 name = watchPoint.name,
@@ -30,7 +31,8 @@ fun main(args: CommandArgs) = args.patrol {
                 schema = watchPoint["schema"] as Map<String, Map<String, *>>?,
                 definitions = watchPoint["definitions"] as Map<String, Any>?,
                 dryRun = dryRun,
-                runOnce = runOnce
+                runOnce = runOnce,
+                setExitIfChanged = scope.setExitIfChanged
             )
         }.apply {
             inspectionJobs[watchPoint.name]?.cancel()

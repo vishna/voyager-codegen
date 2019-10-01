@@ -69,7 +69,8 @@ suspend fun generateCode(
     definitions: Map<String, Any>?,
     schema: Map<String, Map<String, *>>?,
     dryRun: Boolean,
-    runOnce: Boolean
+    runOnce: Boolean,
+    setExitIfChanged: Boolean
 ) = supervisorScope {
 
     if (source.isBlank()) {
@@ -114,9 +115,9 @@ suspend fun generateCode(
     val routerPaths = voyagerYaml.asRouterPaths()
 
     val jobs = mutableListOf<Job>()
-    jobs += async { generateVoyagerPaths(name, routerPaths, target, dryRun, validationResult) }
+    jobs += async { generateVoyagerPaths(name, routerPaths, target, dryRun, setExitIfChanged, validationResult) }
     if (!testTarget.isNullOrBlank()) {
-        jobs += async { generateVoyagerTests(name, routerPaths, testTarget, dryRun) }
+        jobs += async { generateVoyagerTests(name, routerPaths, testTarget, dryRun, setExitIfChanged) }
     }
     jobs.forEach { it.join() }
 }
@@ -126,18 +127,19 @@ suspend fun generateVoyagerPaths(
     routerPaths: List<RouterPath>,
     target: String,
     dryRun: Boolean,
+    setExitIfChanged: Boolean,
     validationResult: ValidationResult?
 ) {
     toPathsDart(name, routerPaths, validationResult)
-        ?.saveToTarget(target, dryRun)
+        ?.saveToTarget(target, dryRun, setExitIfChanged)
 }
 
-suspend fun generateVoyagerTests(name: String, routerPaths: List<RouterPath>, target: String, dryRun: Boolean) {
+suspend fun generateVoyagerTests(name: String, routerPaths: List<RouterPath>, target: String, dryRun: Boolean, setExitIfChanged: Boolean) {
     toTestScenariosDart(name, routerPaths)
-        ?.saveToTarget(target, dryRun)
+        ?.saveToTarget(target, dryRun, setExitIfChanged)
 }
 
-private fun String.saveToTarget(target: String, dryRun: Boolean) {
+private fun String.saveToTarget(target: String, dryRun: Boolean, setExitIfChanged: Boolean) {
     if (dryRun) {
         log.tool..target
         "------------------------------".println
@@ -154,6 +156,11 @@ private fun String.saveToTarget(target: String, dryRun: Boolean) {
         }
 
         if (oldHashCode != hashCode()) {
+            if (setExitIfChanged) {
+                log.boom.."${targetFile.absolutePath} did change and shouldn't have."
+                System.exit(1)
+                return
+            }
             saveAs(target)
             log.save..target
         } else {
