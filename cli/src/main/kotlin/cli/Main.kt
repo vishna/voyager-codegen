@@ -5,6 +5,7 @@ import dev.vishna.emojilog.safe.safely
 import dev.vishna.emojilog.std.boom
 import dev.vishna.patrol.*
 import dev.vishna.voyager.codegen.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -39,7 +40,7 @@ fun main(args: CommandArgs) = args.patrol {
             }
         }
 
-        scope.launch {
+        scope.launch(context = Dispatchers.IO) {
             generateCode(
                 name = watchPoint.name,
                 source = watchPoint.source,
