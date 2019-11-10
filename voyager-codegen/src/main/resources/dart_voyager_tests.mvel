@@ -36,8 +36,8 @@ void _testVoyagerWidget<T extends @{baseScenarioClassName}s>(
       }
     }
 
-    var widget = scenario.argument == null
-        ? VoyagerWidget(path: scenario.path(), router: router)
+    var widget = scenario.stateless == false
+        ? VoyagerWidget(path: scenario.path(), router: router, argument: argument)
         : VoyagerStatelessWidget(
             path: scenario.path(),
             router: router,
@@ -61,11 +61,12 @@ void _testVoyagerWidget<T extends @{baseScenarioClassName}s>(
 
 @experimental
 abstract class @{baseScenarioClassName} {
-  @{baseScenarioClassName}(this.testDescription, this.widgetTesterCallback, {this.argument});
+  @{baseScenarioClassName}(this.testDescription, this.widgetTesterCallback, {this.argument, this.stateless = false});
 
   final String testDescription;
   final WidgetTesterCallback widgetTesterCallback;
   final dynamic argument;
+  final bool stateless;
   WidgetWrapper widgetWrapper;
 
   String path();
