@@ -1,6 +1,5 @@
 /// Generated file, DO NOT EDIT
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:voyager/voyager.dart';
 
 const String pathHome = "/home";
