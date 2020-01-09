@@ -1,17 +1,3 @@
-class @{name}Data extends Voyager {
-  @{name}Data({String path, Voyager parent, Map<String, dynamic> config})
-        : super(path: path, parent: parent, config: config);
-
+extension @{name}Data on Voyager {
   @foreach{field : fields}@{field.type} get @{field.nameSanitized} => this["@{field.name}"];@end{'\n'}
 }
-
-class VoyagerProvider {
-  static @{name}Data of(BuildContext context) => Provider.of<Voyager>(context);
-}
-
-@{name}Data @{nameDecap}DataFactory(
-        AbstractRouteContext abstractContext, Map<String, dynamic> config) =>
-    @{name}Data(
-        path: abstractContext.url(),
-        parent: abstractContext.getExtras().parent,
-        config: config);
