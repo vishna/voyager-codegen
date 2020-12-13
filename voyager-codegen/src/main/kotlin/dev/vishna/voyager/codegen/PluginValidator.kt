@@ -193,6 +193,7 @@ class VoyagerDataClassEmitter(val name: String, val validationResult: Validation
 
     data class Field(val name: String, val type: String) {
         val nameSanitized = name.dartSanitize()
+        val typeSanitized = type.dartNullableType()
     }
 }
 

@@ -25,13 +25,13 @@ String pathSuper({String await_, String async_}) {
 const String typeSuper = "super";
 
 extension VoyagerData on Voyager {
-  String get title => this["title"];
-  String get body => this["body"];
-  String get fabPath => this["fabPath"];
-  String get target => this["target"];
-  bool get await_ => this["await"];
-  Icon get icon => this["icon"];
-  List<dynamic> get actions => this["actions"];
+  String? get title => this["title"];
+  String? get body => this["body"];
+  String? get fabPath => this["fabPath"];
+  String? get target => this["target"];
+  bool? get await_ => this["await"];
+  Icon? get icon => this["icon"];
+  List<dynamic>? get actions => this["actions"];
   List<dynamic> get items => this["items"];
 }
 

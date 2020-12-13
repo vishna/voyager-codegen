@@ -42,18 +42,6 @@ class CoreTest {
     }
 
     @Test
-    fun generateDartTests() = runBlocking<Unit> {
-        val voyagerYaml = "/test_1.yaml".asResource().asYaml()
-        val targetDart = "test_1_scenarios.dart".asResource()
-
-        val generatedTargetDart = toTestScenariosDart(name = "Voyager", routerPaths = voyagerYaml.asRouterPaths())
-
-        requireNotNull(generatedTargetDart) { "Failed generating VoyagerScenarios class for dart" }
-
-        generatedTargetDart `should be equal to` targetDart
-    }
-
-    @Test
     fun validateRectangleYamlPOC() = runBlocking<Unit> {
         val rectangle = "/rectangle.yaml".asResource().asJsonFromYaml()
         val loader = SchemaLoader.builder()

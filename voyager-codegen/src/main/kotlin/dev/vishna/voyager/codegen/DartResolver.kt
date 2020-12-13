@@ -1,10 +1,7 @@
 package dev.vishna.voyager.codegen
 
-import dev.vishna.mvel.interpolate
-import dev.vishna.stringcode.asResource
 import dev.vishna.stringcode.camelize
 import dev.vishna.voyager.codegen.model.RouterPath
-import dev.vishna.voyager.codegen.model.ScenarioClassName
 
 class DartResolver : LangResolver() {
     override fun pathExpression(routerPath: RouterPath): String {
@@ -17,14 +14,6 @@ class DartResolver : LangResolver() {
             return """String $name(${argsExpression(routerPath)}) {
                 |    return "${interpolationExpression(routerPath)}";
                 |  }""".trimMargin()
-        }
-    }
-
-    fun testPathExpression(routerPath: RouterPath): String {
-        if (routerPath.params.isEmpty()) {
-            return """"${routerPath.path}""""
-        } else {
-            return """"${interpolationExpression(routerPath)}""""
         }
     }
 
@@ -48,14 +37,6 @@ class DartResolver : LangResolver() {
 
     override fun typeExpression(routerPath: RouterPath): String {
         return """const String ${"type_${routerPath.type}".camelize(startWithLowerCase = true)} = "${routerPath.type}";"""
-    }
-
-    override fun emit(scenarioClassName: ScenarioClassName): String {
-        return dartVoyagerTestScenarioClass.asResource().interpolate(scenarioClassName)!!
-    }
-
-    fun emitAsExecutionBlock(scenarioClassName: ScenarioClassName): String {
-        return dartVoyagerTestScenarioExecutionBlock.asResource().interpolate(scenarioClassName)!!
     }
 }
 

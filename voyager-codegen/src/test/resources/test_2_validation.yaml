@@ -6,24 +6,24 @@ screen:
     type: string
     enum: ["PageWidget", "FabWidget"]
 title:
-  output: String
+  output: String?
   input:
     type: string
 body:
-  output: String
+  output: String?
   input:
     type: string
 target:
-  output: String
+  output: String?
   input:
     type: string
 icon:
   import: "package:flutter/material.dart"
-  ouput: Icon
+  ouput: Icon?
   input:
     type: string
 rectangle:
-  output: Rect
+  output: Rect?
   input:
     definitions:
       size:
@@ -36,7 +36,7 @@ rectangle:
       b:
         $ref: "#/definitions/size"
 tabs:
-  output: List<String>
+  output: List<String>?
   input:
     type: array
     items:

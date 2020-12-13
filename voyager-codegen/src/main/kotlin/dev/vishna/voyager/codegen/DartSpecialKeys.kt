@@ -11,6 +11,17 @@ fun String.dartSanitize() =
         this
     }
 
+/**
+ * Voyager types are nullable by nature but you can force them to be non-nullable
+ * by explicitly adding !
+ */
+fun String.dartNullableType() =
+        if (endsWith("!")){
+            removeSuffix("!")
+        } else {
+            "$this?"
+        }
+
 private val specialKeywordsList by lazy {
     specialKeywords.split("\n").map { it.trim() }.filter { !it.isNullOrBlank() }
 }

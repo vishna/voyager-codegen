@@ -1,3 +1,3 @@
 extension @{name}Data on Voyager {
-  @foreach{field : fields}@{field.type} get @{field.nameSanitized} => this["@{field.name}"];@end{'\n'}
+  @foreach{field : fields}@{field.typeSanitized} get @{field.nameSanitized} => this["@{field.name}"];@end{'\n'}
 }
