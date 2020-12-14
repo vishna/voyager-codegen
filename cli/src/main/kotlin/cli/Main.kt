@@ -45,7 +45,6 @@ fun main(args: CommandArgs) = args.patrol {
                 name = watchPoint.name,
                 source = watchPoint.source,
                 target = requireNotNull(watchPoint["target"] as String?) { "target value not provided in $watchPoint" },
-                testTarget = watchPoint["testTarget"] as String?,
                 schema = schema ?: (watchPoint["schema"] as Map<String, Map<String, *>>?),
                 definitions = definitions ?: watchPoint["definitions"] as Map<String, Any>?,
                 dryRun = dryRun,

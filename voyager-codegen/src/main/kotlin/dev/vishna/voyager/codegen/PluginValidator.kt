@@ -37,6 +37,8 @@ sealed class PluginError(
     class MissingPluginSchema(routerPath: RouterPath, pluginNode: String) :
         PluginError("No schema defined for plugin $pluginNode", routerPath, pluginNode)
 
+    // TODO nullerror
+
     class Validation(
         message: String,
         routerPath: RouterPath,
