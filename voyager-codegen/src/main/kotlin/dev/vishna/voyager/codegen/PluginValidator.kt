@@ -19,7 +19,9 @@ class PluginValidator(
     val import: String?,
     val input: Schema,
     val pluginStub: Boolean
-)
+) {
+    val isOutputRequired = output != null && output.endsWith("!")
+}
 
 sealed class PluginError(
     val message: String,
@@ -37,7 +39,8 @@ sealed class PluginError(
     class MissingPluginSchema(routerPath: RouterPath, pluginNode: String) :
         PluginError("No schema defined for plugin $pluginNode", routerPath, pluginNode)
 
-    // TODO nullerror
+    class MissingRequiredType(routerPath: RouterPath, pluginNode: String) :
+            PluginError("Missing required value for plugin $pluginNode", routerPath, pluginNode)
 
     class Validation(
         message: String,
@@ -78,6 +81,7 @@ fun validateVoyagerPaths(
     }.associateBy({ it.pluginNode }, { it })
 
     val errors = mutableListOf<PluginError>()
+    val requiredNodes = pluginValidators.values.filter { it.isOutputRequired }.map { it.pluginNode }
 
     val routerPaths = voyagerYaml.asRouterPaths()
     routerPaths.forEach { routerPath ->
@@ -87,6 +91,17 @@ fun validateVoyagerPaths(
         }
 
         val config = routerPath.config
+
+        var hasMissingTypes = false
+        requiredNodes.forEach { pluginNode ->
+            if (!config.keys.contains(pluginNode)) {
+                errors += PluginError.MissingRequiredType(routerPath, pluginNode)
+                hasMissingTypes = true
+            }
+        }
+        if (hasMissingTypes) {
+            return@forEach
+        }
 
         config.keys.forEach { pluginNode ->
             if (pluginNode == "type") {

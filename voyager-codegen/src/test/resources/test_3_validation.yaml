@@ -64,7 +64,7 @@
         items:
           $ref: "#/definitions/action"
     items:
-      output: List<dynamic>!
+      output: List<dynamic>
       input:
         type: array
         items:

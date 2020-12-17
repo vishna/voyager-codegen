@@ -32,9 +32,9 @@ extension VoyagerData on Voyager {
   bool? get await_ => this["await"];
   Icon? get icon => this["icon"];
   List<dynamic>? get actions => this["actions"];
-  List<dynamic> get items => this["items"];
+  List<dynamic>? get items => this["items"];
 }
 
-abstract class IconPluginStub extends RouterObjectPlugin<Icon> {
+abstract class IconPluginStub extends VoyagerObjectPlugin<Icon> {
   IconPluginStub() : super("icon");
 }
