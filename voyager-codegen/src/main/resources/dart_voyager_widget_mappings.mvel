@@ -1,0 +1,12 @@
+final generated@{name}WidgetMappings = <String, WidgetBuilder>{
+  @foreach{mapping : mappings}"@{mapping.className}": (context) => @{mapping.className}()@end{',\n'}
+};
+
+WidgetPluginBuilder generated@{name}WidgetPluginBuilder() {
+  final builder = WidgetPluginBuilder();
+  generated@{name}WidgetMappings.forEach(builder.add);
+  return builder;
+}
+
+WidgetPlugin generated@{name}WidgetPlugin() =>
+    generated@{name}WidgetPluginBuilder().build();

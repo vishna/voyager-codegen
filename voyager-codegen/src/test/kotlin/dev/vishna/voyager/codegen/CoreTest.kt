@@ -4,6 +4,7 @@ import dev.vishna.stringcode.asResource
 import kotlinx.coroutines.runBlocking
 import org.amshove.kluent.`should be empty`
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should not be empty`
 import org.amshove.kluent.shouldBeEqualTo
 import org.everit.json.schema.ValidationException
 import org.junit.Test
@@ -33,8 +34,11 @@ class CoreTest {
     fun generateDartFromYaml() = runBlocking<Unit> {
         val voyagerYaml = "/test_1.yaml".asResource().asYaml()
         val targetDart = "test_1.dart".asResource()
+        val routerPaths = voyagerYaml.asRouterPaths()
+        val widgetMappings = toWidgetMappings(routerPaths, null)
 
-        val generatedTargetDart = toPathsDart(name = "Voyager", routerPaths = voyagerYaml.asRouterPaths(), `package` = "", part = "test_1.dart")
+        val generatedTargetDart = toPathsDart(name = "Voyager",routerPaths = routerPaths,
+                widgetMappings = widgetMappings, `package` = "", part = "test_1.dart")
 
         requireNotNull(generatedTargetDart) { "Failed generating VoyagerPaths class for dart" }
 
@@ -77,6 +81,8 @@ class CoreTest {
         // TEST DATA
         val voyagerYaml = "/test_3.yaml".asResource().asYaml()
         val voyagerCodegen = "/test_3_validation.yaml".asResource().asYamlArray().first() as Map<String, *>
+        val routerPaths = voyagerYaml.asRouterPaths()
+        val widgetMappings = toWidgetMappings(routerPaths, null)
 
         // VALIDATION ROUTINE
         val globalDefinitions = voyagerCodegen["definitions"] as? Map<String, Any>
@@ -88,13 +94,45 @@ class CoreTest {
 
         val generatedTargetDart = toPathsDart(
             name = "Voyager",
-            routerPaths = voyagerYaml.asRouterPaths(),
+            routerPaths = routerPaths,
+            widgetMappings = widgetMappings,
             validationResult = validationResult,
             `package` = "",
             part = "test_3.dart"
         )!!
 
         generatedTargetDart `should be equal to` "/test_3.dart".asResource()
+    }
+
+    @Test
+    fun `generate widget plugin stub`() = runBlocking<Unit> {
+        // TEST DATA
+        val voyagerYaml = "/test_3.yaml".asResource().asYaml()
+        val voyagerCodegen = "/test_3_validation.yaml".asResource().asYamlArray().first() as Map<String, *>
+        val routerPaths = voyagerYaml.asRouterPaths()
+        val widgetMappings = toWidgetMappings(routerPaths, mapOf(
+                "skip" to listOf<String>("%{class}Widget", "FabWidget")
+        ))
+
+        // VALIDATION ROUTINE
+        val globalDefinitions = voyagerCodegen["definitions"] as? Map<String, Any>
+        val schema = voyagerCodegen["schema"] as Map<String, Map<String, *>>
+
+        val validationResult = validateVoyagerPaths(voyagerYaml, schema, globalDefinitions)
+
+        validationResult.errors.`should be empty`()
+        widgetMappings.`should not be empty`()
+
+        val generatedTargetDart = toPathsDart(
+                name = "Voyager",
+                routerPaths = routerPaths,
+                widgetMappings = widgetMappings,
+                validationResult = validationResult,
+                `package` = "",
+                part = "test_3.dart"
+        )!!
+
+        generatedTargetDart `should be equal to` "/test_3+widgetPlugin.dart".asResource()
     }
 
     @Test

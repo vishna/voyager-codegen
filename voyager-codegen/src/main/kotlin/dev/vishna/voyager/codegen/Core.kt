@@ -30,6 +30,11 @@ const val dartVoyagerDataClass: ResourcePath = "/dart_voyager_data_class.mvel"
 const val dartVoyagerPluginStub: ResourcePath = "/dart_voyager_plugin_stub.mvel"
 
 /**
+ * Template for the widget mappings
+ */
+const val dartVoyagerWidgetMappings: ResourcePath = "/dart_voyager_widget_mappings.mvel"
+
+/**
  * Initial template this tool consumes
  */
 const val voyagerCodegen: ResourcePath = "/voyager-codegen.yaml"
@@ -49,6 +54,7 @@ suspend fun generateCode(
     target: String,
     definitions: Map<String, Any>?,
     schema: Map<String, Map<String, *>>?,
+    widgetPlugin: Map<String, Map<String, *>>?,
     dryRun: Boolean,
     runOnce: Boolean,
     setExitIfChanged: Boolean,
@@ -103,15 +109,17 @@ suspend fun generateCode(
     }
 
     val routerPaths = voyagerYaml.asRouterPaths().filter { it.`package` == `package` }
+    val widgetMapping = toWidgetMappings(routerPaths, widgetPlugin)
 
     val jobs = mutableListOf<Job>()
-    jobs += async { generateVoyagerPaths(name, routerPaths, target, part, dryRun, setExitIfChanged, validationResult, `package`) }
+    jobs += async { generateVoyagerPaths(name, routerPaths, widgetMapping, target, part, dryRun, setExitIfChanged, validationResult, `package`) }
     jobs.forEach { it.join() }
 }
 
 suspend fun generateVoyagerPaths(
     name: String,
     routerPaths: List<RouterPath>,
+    widgetMappings: List<WidgetMapping>,
     target: String,
     part: String,
     dryRun: Boolean,
@@ -119,7 +127,7 @@ suspend fun generateVoyagerPaths(
     validationResult: ValidationResult?,
     `package`: String
 ) {
-    toPathsDart(name, part, routerPaths, validationResult, `package`)
+    toPathsDart(name, part, widgetMappings, routerPaths, validationResult, `package`)
         ?.saveToTarget(target, dryRun, setExitIfChanged)
 }
 
@@ -164,11 +172,12 @@ fun Map<String, Map<String, *>>.asRouterPaths(): List<RouterPath> = keys
     }.filter { it.path.isNotBlank() }
 
 internal suspend fun toPathsDart(
-    name: String,
-    part: String,
-    routerPaths: List<RouterPath>,
-    validationResult: ValidationResult? = null,
-    `package`: String
+        name: String,
+        part: String,
+        widgetMappings: List<WidgetMapping>,
+        routerPaths: List<RouterPath>,
+        validationResult: ValidationResult? = null,
+        `package`: String
 ): String? {
     var data : VoyagerDataClassEmitter? = null
     val imports = mutableListOf<String>()
@@ -192,7 +201,8 @@ internal suspend fun toPathsDart(
                     "imports" to imports.distinctBy { it }.sortedBy { it },
                     "data" to data,
                     "stubs" to stubs,
-                    "part" to part
+                    "part" to part,
+                    "widgetMappings" to WidgetPluginEmitter(name, widgetMappings)
                 )
             )
     } catch (t: Throwable) {

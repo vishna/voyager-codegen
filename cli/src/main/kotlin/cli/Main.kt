@@ -47,6 +47,7 @@ fun main(args: CommandArgs) = args.patrol {
                 target = requireNotNull(watchPoint["target"] as String?) { "target value not provided in $watchPoint" },
                 schema = schema ?: (watchPoint["schema"] as Map<String, Map<String, *>>?),
                 definitions = definitions ?: watchPoint["definitions"] as Map<String, Any>?,
+                widgetPlugin = watchPoint["widgetPlugin"] as Map<String, Map<String, *>>?,
                 dryRun = dryRun,
                 runOnce = runOnce,
                 setExitIfChanged = scope.setExitIfChanged,

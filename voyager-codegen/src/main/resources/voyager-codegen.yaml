@@ -13,4 +13,4 @@
 #        type: string
 # uncomment below for widget plugin generation
 #  widgetPlugin:
-#    schema: []
+#    skip: [] # list of Widgets that generation should be skipped (e.g. you want to provide mapping yourself)
