@@ -41,13 +41,23 @@ fun main(args: CommandArgs) = args.patrol {
         }
 
         scope.launch(context = Dispatchers.IO) {
+            val widgetPlugin = if (watchPoint["widgetPlugin"] is Boolean) {
+                val shouldHaveWidgetPlugin = watchPoint["widgetPlugin"] as Boolean
+                if (shouldHaveWidgetPlugin) {
+                    emptyMap<String, Map<String, *>>()
+                } else {
+                    null
+                }
+            } else {
+                watchPoint["widgetPlugin"] as Map<String, Map<String, *>>?
+            }
             generateCode(
                 name = watchPoint.name,
                 source = watchPoint.source,
                 target = requireNotNull(watchPoint["target"] as String?) { "target value not provided in $watchPoint" },
                 schema = schema ?: (watchPoint["schema"] as Map<String, Map<String, *>>?),
                 definitions = definitions ?: watchPoint["definitions"] as Map<String, Any>?,
-                widgetPlugin = watchPoint["widgetPlugin"] as Map<String, Map<String, *>>?,
+                widgetPlugin = widgetPlugin,
                 dryRun = dryRun,
                 runOnce = runOnce,
                 setExitIfChanged = scope.setExitIfChanged,

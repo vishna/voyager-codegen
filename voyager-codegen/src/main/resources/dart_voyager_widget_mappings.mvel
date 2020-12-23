@@ -1,5 +1,5 @@
 final generated@{name}WidgetMappings = <String, WidgetBuilder>{
-  @foreach{mapping : mappings}"@{mapping.className}": (context) => @{mapping.className}()@end{',\n'}
+  @foreach{mapping : mappings}"@{mapping.className}": @{mapping.emit()}@end{',\n'}
 };
 
 WidgetPluginBuilder generated@{name}WidgetPluginBuilder() {

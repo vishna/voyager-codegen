@@ -2,6 +2,7 @@ package dev.vishna.voyager.codegen
 
 import dev.vishna.mvel.interpolate
 import dev.vishna.stringcode.asResource
+import dev.vishna.stringcode.startsWithLowercase
 import dev.vishna.voyager.codegen.model.RouterPath
 
 fun toWidgetMappings(routerPaths: List<RouterPath>, widgetPlugin: Map<String, *>?) : List<WidgetMapping> {
@@ -16,7 +17,14 @@ fun toWidgetMappings(routerPaths: List<RouterPath>, widgetPlugin: Map<String, *>
             .map { WidgetMapping(it) }
 }
 
-data class WidgetMapping(val className: String)
+data class WidgetMapping(val className: String) {
+    fun emit() : String = if (className.startsWithLowercase()) {
+        // it's a method
+        className
+    } else {
+        "(context) => $className()"
+    }
+}
 
 class WidgetPluginEmitter(val name: String, val widgetMappings: List<WidgetMapping>) {
     fun emit() : String {
