@@ -34,7 +34,7 @@ class CoreTest {
         val voyagerYaml = "/test_1.yaml".asResource().asYaml()
         val targetDart = "test_1.dart".asResource()
 
-        val generatedTargetDart = toPathsDart(name = "Voyager", routerPaths = voyagerYaml.asRouterPaths(), `package` = "")
+        val generatedTargetDart = toPathsDart(name = "Voyager", routerPaths = voyagerYaml.asRouterPaths(), `package` = "", part = "test_1.dart")
 
         requireNotNull(generatedTargetDart) { "Failed generating VoyagerPaths class for dart" }
 
@@ -90,7 +90,8 @@ class CoreTest {
             name = "Voyager",
             routerPaths = voyagerYaml.asRouterPaths(),
             validationResult = validationResult,
-            `package` = ""
+            `package` = "",
+            part = "test_3.dart"
         )!!
 
         generatedTargetDart `should be equal to` "/test_3.dart".asResource()

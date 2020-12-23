@@ -1,6 +1,6 @@
 /// Generated file, DO NOT EDIT
-import 'package:flutter/widgets.dart';
-import 'package:voyager/voyager.dart';
+// ignore_for_file: public_member_api_docs
+part of 'test_3.dart';
 
 const String pathHome = "/home";
 const String typeHome = "home";

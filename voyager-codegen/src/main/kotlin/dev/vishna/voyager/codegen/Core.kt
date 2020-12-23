@@ -65,6 +65,14 @@ suspend fun generateCode(
         throw IllegalStateException("Provided source file for $name doesn't exist")
     }
 
+    val targetFileName = target.split("/").last()
+
+    if (!targetFileName.endsWith(".voyager.dart")) {
+        throw IllegalStateException("Target file name must end with .voyager.dart extension")
+    }
+
+    val part = targetFileName.replace(".voyager.dart", ".dart")
+
     // load voyager yaml either from standalone file or source code
     val voyagerYaml = when (voyagerFile.extension.trim()) {
         "dart" -> voyagerFile
@@ -97,7 +105,7 @@ suspend fun generateCode(
     val routerPaths = voyagerYaml.asRouterPaths().filter { it.`package` == `package` }
 
     val jobs = mutableListOf<Job>()
-    jobs += async { generateVoyagerPaths(name, routerPaths, target, dryRun, setExitIfChanged, validationResult, `package`) }
+    jobs += async { generateVoyagerPaths(name, routerPaths, target, part, dryRun, setExitIfChanged, validationResult, `package`) }
     jobs.forEach { it.join() }
 }
 
@@ -105,12 +113,13 @@ suspend fun generateVoyagerPaths(
     name: String,
     routerPaths: List<RouterPath>,
     target: String,
+    part: String,
     dryRun: Boolean,
     setExitIfChanged: Boolean,
     validationResult: ValidationResult?,
     `package`: String
 ) {
-    toPathsDart(name, routerPaths, validationResult, `package`)
+    toPathsDart(name, part, routerPaths, validationResult, `package`)
         ?.saveToTarget(target, dryRun, setExitIfChanged)
 }
 
@@ -156,6 +165,7 @@ fun Map<String, Map<String, *>>.asRouterPaths(): List<RouterPath> = keys
 
 internal suspend fun toPathsDart(
     name: String,
+    part: String,
     routerPaths: List<RouterPath>,
     validationResult: ValidationResult? = null,
     `package`: String
@@ -181,7 +191,8 @@ internal suspend fun toPathsDart(
                     "paths" to routerPaths,
                     "imports" to imports.distinctBy { it }.sortedBy { it },
                     "data" to data,
-                    "stubs" to stubs
+                    "stubs" to stubs,
+                    "part" to part
                 )
             )
     } catch (t: Throwable) {

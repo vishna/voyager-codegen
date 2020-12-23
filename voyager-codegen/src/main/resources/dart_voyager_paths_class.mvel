@@ -1,7 +1,6 @@
 /// Generated file, DO NOT EDIT
 // ignore_for_file: public_member_api_docs
-@foreach{i : imports}import '@{i}';@end{'\n'}
-
+part of '@{part}';
 
 @foreach{path : paths}@{resolver.pathExpression(path)}
 @{resolver.typeExpression(path)}@end{'\n'}

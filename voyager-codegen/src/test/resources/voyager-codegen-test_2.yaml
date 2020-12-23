@@ -3,7 +3,6 @@
 - name: Voyager # base name for generated classes, e.g. VoyagerPaths, VoyagerTests etc.
   source: # TODO supply location of your voyager map
   target: lib/gen/voyager_gen.dart
-  testTarget: test/gen/voyager_gen.dart
   definitions:
     size:
       type: number

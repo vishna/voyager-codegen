@@ -54,7 +54,6 @@
     icon:
       pluginStub: true
       output: Icon
-      import: "package:flutter/widgets.dart"
       input:
         $ref: "#/definitions/icon"
     actions:
