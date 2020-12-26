@@ -53,6 +53,8 @@ sealed class PluginError(
         "${routerPath.path}${if (pluginNode.isBlank()) "" else "@"}$pluginNode: $message"
 }
 
+private val OPTIONAL_PLUGINS = listOf("redirect", "widget")
+
 fun validateVoyagerPaths(
     voyagerYaml: Map<String, Map<String, *>>,
     schema: Map<String, Map<String, *>>,
@@ -119,6 +121,10 @@ fun validateVoyagerPaths(
                 return@forEach
             }
             val pluginValidator = pluginValidators[pluginNode]
+            if (pluginValidator == null && OPTIONAL_PLUGINS.contains(pluginNode)) {
+                // a plugin validation that can be omitted
+                return@forEach
+            }
             if (pluginValidator == null) {
                 errors += PluginError.MissingPluginSchema(routerPath, pluginNode)
                 return@forEach
