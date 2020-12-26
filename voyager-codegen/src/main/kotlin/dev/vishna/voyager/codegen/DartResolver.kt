@@ -30,7 +30,7 @@ class DartResolver : LangResolver() {
     private fun interpolationExpression(routerPath: RouterPath) : String {
         var output = routerPath.path
         routerPath.params.forEach {
-            output = output.replace(":$it", "$${it.dartSanitize()}")
+            output = output.replace(":$it", "$${it.dartSanitize()}").removeSuffix(":")
         }
         return output
     }

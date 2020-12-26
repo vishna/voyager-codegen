@@ -9,6 +9,6 @@ data class RouterPath(
     val params: List<String> = path
             .split("/")
             .filter { it.startsWith(":") }
-            .map { it.removePrefix(":") }
+            .map { it.removePrefix(":").removeSuffix(":") }
 
 }
