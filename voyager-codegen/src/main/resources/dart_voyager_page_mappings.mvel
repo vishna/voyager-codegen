@@ -1,0 +1,12 @@
+final generated@{name}PageMappings = <String, VoyagerPageBuilder>{
+  @foreach{mapping : mappings}"@{mapping.name}": @{mapping.emit()}@end{',\n'}
+};
+
+PagePluginBuilder generated@{name}PagePluginBuilder() {
+  final builder = PagePluginBuilder();
+  generated@{name}PageMappings.forEach(builder.add);
+  return builder;
+}
+
+PagePlugin generated@{name}PagePlugin() =>
+    generated@{name}PagePluginBuilder().build();

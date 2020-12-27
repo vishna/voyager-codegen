@@ -51,6 +51,16 @@ fun main(args: CommandArgs) = args.patrol {
             } else {
                 watchPoint["widgetPlugin"] as Map<String, Map<String, *>>?
             }
+            val pagePlugin = if (watchPoint["pagePlugin"] is Boolean) {
+                val shouldHaveWidgetPlugin = watchPoint["pagePlugin"] as Boolean
+                if (shouldHaveWidgetPlugin) {
+                    emptyMap<String, Map<String, *>>()
+                } else {
+                    null
+                }
+            } else {
+                watchPoint["pagePlugin"] as Map<String, Map<String, *>>?
+            }
             generateCode(
                 name = watchPoint.name,
                 source = watchPoint.source,
@@ -58,6 +68,7 @@ fun main(args: CommandArgs) = args.patrol {
                 schema = schema ?: (watchPoint["schema"] as Map<String, Map<String, *>>?),
                 definitions = definitions ?: watchPoint["definitions"] as Map<String, Any>?,
                 widgetPlugin = widgetPlugin,
+                pagePlugin = pagePlugin,
                 dryRun = dryRun,
                 runOnce = runOnce,
                 setExitIfChanged = scope.setExitIfChanged,

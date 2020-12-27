@@ -35,6 +35,11 @@ const val dartVoyagerPluginStub: ResourcePath = "/dart_voyager_plugin_stub.mvel"
 const val dartVoyagerWidgetMappings: ResourcePath = "/dart_voyager_widget_mappings.mvel"
 
 /**
+ * Template for the page mappings
+ */
+const val dartVoyagerPageMappings: ResourcePath = "/dart_voyager_page_mappings.mvel"
+
+/**
  * Initial template this tool consumes
  */
 const val voyagerCodegen: ResourcePath = "/voyager-codegen.yaml"
@@ -55,6 +60,7 @@ suspend fun generateCode(
     definitions: Map<String, Any>?,
     schema: Map<String, Map<String, *>>?,
     widgetPlugin: Map<String, Map<String, *>>?,
+    pagePlugin: Map<String, Map<String, *>>?,
     dryRun: Boolean,
     runOnce: Boolean,
     setExitIfChanged: Boolean,
@@ -109,10 +115,13 @@ suspend fun generateCode(
     }
 
     val routerPaths = voyagerYaml.asRouterPaths().filter { it.`package` == `package` }
-    val widgetMapping = toWidgetMappings(routerPaths, widgetPlugin)
+    val widgetMappings = toWidgetMappings(routerPaths, widgetPlugin)
+    val pageMappings = toPageMappings(routerPaths, pagePlugin)
 
     val jobs = mutableListOf<Job>()
-    jobs += async { generateVoyagerPaths(name, routerPaths, widgetMapping, target, part, dryRun, setExitIfChanged, validationResult, `package`) }
+    jobs += async { generateVoyagerPaths(
+            name, routerPaths, widgetMappings, pageMappings,
+            target, part, dryRun, setExitIfChanged, validationResult, `package`) }
     jobs.forEach { it.join() }
 }
 
@@ -120,6 +129,7 @@ suspend fun generateVoyagerPaths(
     name: String,
     routerPaths: List<RouterPath>,
     widgetMappings: List<WidgetMapping>,
+    pageMappings: List<PageMapping>,
     target: String,
     part: String,
     dryRun: Boolean,
@@ -127,7 +137,7 @@ suspend fun generateVoyagerPaths(
     validationResult: ValidationResult?,
     `package`: String
 ) {
-    toPathsDart(name, part, widgetMappings, routerPaths, validationResult, `package`)
+    toPathsDart(name, part, widgetMappings, pageMappings, routerPaths, validationResult, `package`)
         ?.saveToTarget(target, dryRun, setExitIfChanged)
 }
 
@@ -175,6 +185,7 @@ internal suspend fun toPathsDart(
         name: String,
         part: String,
         widgetMappings: List<WidgetMapping>,
+        pageMappings: List<PageMapping>,
         routerPaths: List<RouterPath>,
         validationResult: ValidationResult? = null,
         `package`: String
@@ -202,7 +213,8 @@ internal suspend fun toPathsDart(
                     "data" to data,
                     "stubs" to stubs,
                     "part" to part,
-                    "widgetMappings" to WidgetPluginEmitter(name, widgetMappings)
+                    "widgetMappings" to WidgetPluginEmitter(name, widgetMappings),
+                    "pageMappings" to PagePluginEmitter(name, pageMappings)
                 )
             )
     } catch (t: Throwable) {

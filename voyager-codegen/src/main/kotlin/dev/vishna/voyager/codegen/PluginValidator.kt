@@ -53,7 +53,7 @@ sealed class PluginError(
         "${routerPath.path}${if (pluginNode.isBlank()) "" else "@"}$pluginNode: $message"
 }
 
-private val OPTIONAL_PLUGINS = listOf("redirect", "widget")
+private val OPTIONAL_PLUGINS = listOf("redirect", "widget", "page")
 
 fun validateVoyagerPaths(
     voyagerYaml: Map<String, Map<String, *>>,

@@ -36,9 +36,11 @@ class CoreTest {
         val targetDart = "test_1.dart".asResource()
         val routerPaths = voyagerYaml.asRouterPaths()
         val widgetMappings = toWidgetMappings(routerPaths, null)
+        val pageMappings = toPageMappings(routerPaths, null)
 
         val generatedTargetDart = toPathsDart(name = "Voyager",routerPaths = routerPaths,
-                widgetMappings = widgetMappings, `package` = "", part = "test_1.dart")
+                widgetMappings = widgetMappings, pageMappings = pageMappings,
+                `package` = "", part = "test_1.dart")
 
         requireNotNull(generatedTargetDart) { "Failed generating VoyagerPaths class for dart" }
 
@@ -89,6 +91,7 @@ class CoreTest {
         val schema = voyagerCodegen["schema"] as Map<String, Map<String, *>>
 
         val validationResult = validateVoyagerPaths(voyagerYaml, schema, globalDefinitions)
+        val pageMappings = toPageMappings(routerPaths, null)
 
         validationResult.errors.`should be empty`()
 
@@ -96,6 +99,7 @@ class CoreTest {
             name = "Voyager",
             routerPaths = routerPaths,
             widgetMappings = widgetMappings,
+            pageMappings = pageMappings,
             validationResult = validationResult,
             `package` = "",
             part = "test_3.dart"
@@ -113,6 +117,7 @@ class CoreTest {
         val widgetMappings = toWidgetMappings(routerPaths, mapOf(
                 "skip" to listOf<String>("%{class}Widget", "FabWidget")
         ))
+        val pageMappings = toPageMappings(routerPaths, null)
 
         // VALIDATION ROUTINE
         val globalDefinitions = voyagerCodegen["definitions"] as? Map<String, Any>
@@ -127,6 +132,7 @@ class CoreTest {
                 name = "Voyager",
                 routerPaths = routerPaths,
                 widgetMappings = widgetMappings,
+                pageMappings = pageMappings,
                 validationResult = validationResult,
                 `package` = "",
                 part = "test_3.dart"

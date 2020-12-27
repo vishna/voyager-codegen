@@ -15,3 +15,5 @@ part of '@{part}';
 @foreach{stub : stubs}@{stub.emit()}@end{'\n'}
 
 @{widgetMappings.emit()}
+
+@{pageMappings.emit()}
