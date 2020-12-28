@@ -1,16 +1,14 @@
 ## This file should be checked in version control
 ## Describes sources and targets for the voyager-codegen tool
 ## https://github.com/vishna/voyager/blob/master/example/voyager-codegen.yaml
-- name: Voyager # base name for generated classes, e.g. VoyagerData, VoyagerTests etc.
+- name: Voyager # base name for generated classes
   source: # TODO supply location of your voyager map
   target: lib/navigation.voyager.dart
+  widgetPlugin: true
+  pagePlugin: true
 # uncomment below for schema validation
-# for mote info check the example app (link below):
 #  definitions:
 #  schema:
 #    widget:
 #      input:
 #        type: string
-# uncomment below for widget plugin generation
-#  widgetPlugin:
-#    skip: [] # list of Widgets that generation should be skipped (e.g. you want to provide mapping yourself)
