@@ -54,17 +54,17 @@ fun bootstrapVoyagerPatrolConfig(patrolFile: File) = if (File(pwd, "pubspec.yaml
 }
 
 suspend fun generateCode(
-    name: String,
-    source: String,
-    target: String,
-    definitions: Map<String, Any>?,
-    schema: Map<String, Map<String, *>>?,
-    widgetPlugin: Map<String, Map<String, *>>?,
-    pagePlugin: Map<String, Map<String, *>>?,
-    dryRun: Boolean,
-    runOnce: Boolean,
-    setExitIfChanged: Boolean,
-    `package`: String
+        name: String,
+        source: String,
+        target: String,
+        definitions: Map<String, Any>?,
+        schema: Map<String, Map<String, *>>?,
+        widgetPlugin: Map<String, Map<String, *>>?,
+        pagePlugin: Map<String, Map<String, *>>?,
+        dryRun: Boolean,
+        runOnce: Boolean,
+        setExitIfChanged: Boolean,
+        `package`: String
 ) = supervisorScope {
 
     if (source.isBlank()) {
@@ -86,16 +86,29 @@ suspend fun generateCode(
     val part = targetFileName.replace(".voyager.dart", ".dart")
 
     // load voyager yaml either from standalone file or source code
-    val voyagerYaml = when (voyagerFile.extension.trim()) {
-        "dart" -> voyagerFile
-            .readText()
-            .split("'''")[1]
-        "yaml", "yml" -> voyagerFile.readText()
+    val voyagerNavigationMap = when (voyagerFile.extension.trim()) {
+        "dart" -> {
+            val dartCode = voyagerFile.readText()
+            val navMapUnparsed = when {
+                dartCode.contains("'''") -> dartCode.split("'''")[1]
+                dartCode.contains("\"\"\"") -> dartCode.split("\"\"\"")[1]
+                else -> throw IllegalStateException("Dart file specified as a source of navigation map but is missing tripple ''' quoted string with that map")
+            }.trim()
+
+            // guessing the type of the unparsed data by first character 🙈
+            if (navMapUnparsed.startsWith("{")) {
+                navMapUnparsed.asJson()
+            } else {
+                navMapUnparsed.asYaml()
+            }
+        }
+        "yaml", "yml" -> voyagerFile.readText().asYaml()
+        "json" -> voyagerFile.readText().asJson()
         else -> throw IllegalStateException("Unsupported file extension ${voyagerFile.extension}")
-    }.asYaml()
+    }
 
     val validationResult = if (schema != null) {
-        val validationOutput = validateVoyagerPaths(voyagerYaml, schema, definitions)
+        val validationOutput = validateVoyagerPaths(voyagerNavigationMap, schema, definitions)
         validationOutput.errors.forEach { error ->
             log.warn..error
         }
@@ -114,31 +127,33 @@ suspend fun generateCode(
         null
     }
 
-    val routerPaths = voyagerYaml.asRouterPaths().filter { it.`package` == `package` }
+    val routerPaths = voyagerNavigationMap.asRouterPaths().filter { it.`package` == `package` }
     val widgetMappings = toWidgetMappings(routerPaths, widgetPlugin)
     val pageMappings = toPageMappings(routerPaths, pagePlugin)
 
     val jobs = mutableListOf<Job>()
-    jobs += async { generateVoyagerPaths(
-            name, routerPaths, widgetMappings, pageMappings,
-            target, part, dryRun, setExitIfChanged, validationResult, `package`) }
+    jobs += async {
+        generateVoyagerPaths(
+                name, routerPaths, widgetMappings, pageMappings,
+                target, part, dryRun, setExitIfChanged, validationResult, `package`)
+    }
     jobs.forEach { it.join() }
 }
 
 suspend fun generateVoyagerPaths(
-    name: String,
-    routerPaths: List<RouterPath>,
-    widgetMappings: List<WidgetMapping>,
-    pageMappings: List<PageMapping>,
-    target: String,
-    part: String,
-    dryRun: Boolean,
-    setExitIfChanged: Boolean,
-    validationResult: ValidationResult?,
-    `package`: String
+        name: String,
+        routerPaths: List<RouterPath>,
+        widgetMappings: List<WidgetMapping>,
+        pageMappings: List<PageMapping>,
+        target: String,
+        part: String,
+        dryRun: Boolean,
+        setExitIfChanged: Boolean,
+        validationResult: ValidationResult?,
+        `package`: String
 ) {
     toPathsDart(name, part, widgetMappings, pageMappings, routerPaths, validationResult, `package`)
-        ?.saveToTarget(target, dryRun, setExitIfChanged)
+            ?.saveToTarget(target, dryRun, setExitIfChanged)
 }
 
 private fun String.saveToTarget(target: String, dryRun: Boolean, setExitIfChanged: Boolean) {
@@ -172,14 +187,14 @@ private fun String.saveToTarget(target: String, dryRun: Boolean, setExitIfChange
 }
 
 fun Map<String, Map<String, *>>.asRouterPaths(): List<RouterPath> = keys
-    .map {
-        RouterPath(
-            path = it,
-            type = this[it]?.get("type")?.toString() ?: "",
-            `package` = this[it]?.get("package")?.toString() ?: "",
-            config = this[it]
-        )
-    }.filter { it.path.isNotBlank() }.sortedBy { it.type }
+        .map {
+            RouterPath(
+                    path = it,
+                    type = this[it]?.get("type")?.toString() ?: "",
+                    `package` = this[it]?.get("package")?.toString() ?: "",
+                    config = this[it]
+            )
+        }.filter { it.path.isNotBlank() }.sortedBy { it.type }
 
 internal suspend fun toPathsDart(
         name: String,
@@ -190,7 +205,7 @@ internal suspend fun toPathsDart(
         validationResult: ValidationResult? = null,
         `package`: String
 ): String? {
-    var data : VoyagerDataClassEmitter? = null
+    var data: VoyagerDataClassEmitter? = null
     val imports = mutableListOf<String>()
     val outputsCount = validationResult?.validators?.mapNotNull { it.output }?.size ?: 0
     var stubs = emptyList<PluginStubClassEmitter>()
@@ -203,20 +218,20 @@ internal suspend fun toPathsDart(
 
     val generatedDart = try {
         dartVoyagerPathsClass
-            .asResource()
-            .interpolate(
-                mapOf(
-                    "resolver" to DartResolver(),
-                    "name" to name,
-                    "paths" to routerPaths,
-                    "imports" to imports.distinctBy { it }.sortedBy { it },
-                    "data" to data,
-                    "stubs" to stubs,
-                    "part" to part,
-                    "widgetMappings" to WidgetPluginEmitter(name, widgetMappings),
-                    "pageMappings" to PagePluginEmitter(name, pageMappings)
+                .asResource()
+                .interpolate(
+                        mapOf(
+                                "resolver" to DartResolver(),
+                                "name" to name,
+                                "paths" to routerPaths,
+                                "imports" to imports.distinctBy { it }.sortedBy { it },
+                                "data" to data,
+                                "stubs" to stubs,
+                                "part" to part,
+                                "widgetMappings" to WidgetPluginEmitter(name, widgetMappings),
+                                "pageMappings" to PagePluginEmitter(name, pageMappings)
+                        )
                 )
-            )
     } catch (t: Throwable) {
         log.boom..t
         throw t
