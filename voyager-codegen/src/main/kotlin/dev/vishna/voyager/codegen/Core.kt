@@ -179,7 +179,7 @@ fun Map<String, Map<String, *>>.asRouterPaths(): List<RouterPath> = keys
             `package` = this[it]?.get("package")?.toString() ?: "",
             config = this[it]
         )
-    }.filter { it.path.isNotBlank() }
+    }.filter { it.path.isNotBlank() }.sortedBy { it.type }
 
 internal suspend fun toPathsDart(
         name: String,

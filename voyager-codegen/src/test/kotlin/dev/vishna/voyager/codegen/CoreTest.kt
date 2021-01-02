@@ -22,12 +22,12 @@ class CoreTest {
         val routerPaths = voyagerYaml.asRouterPaths()
 
         routerPaths.size `should be equal to` 3
-        routerPaths[0].path `should be equal to` "/home"
-        routerPaths[0].type `should be equal to` "home"
-        routerPaths[1].path `should be equal to` "/other/:title"
-        routerPaths[1].type `should be equal to` "other"
-        routerPaths[2].path `should be equal to` "/fab"
-        routerPaths[2].type `should be equal to` "fab"
+        routerPaths[0].path `should be equal to` "/fab"
+        routerPaths[0].type `should be equal to` "fab"
+        routerPaths[1].path `should be equal to` "/home"
+        routerPaths[1].type `should be equal to` "home"
+        routerPaths[2].path `should be equal to` "/other/:title"
+        routerPaths[2].type `should be equal to` "other"
     }
 
     @Test
@@ -103,6 +103,36 @@ class CoreTest {
             validationResult = validationResult,
             `package` = "",
             part = "test_3.dart"
+        )!!
+
+        generatedTargetDart `should be equal to` "/test_3.dart".asResource()
+    }
+
+    @Test
+    fun validateJsonPlusSpecialKeys() = runBlocking<Unit> {
+        // TEST DATA
+        val voyagerJson = "/test_3.json".asResource().asJson()
+        val voyagerCodegen = "/test_3_validation.yaml".asResource().asYamlArray().first() as Map<String, *>
+        val routerPaths = voyagerJson.asRouterPaths()
+        val widgetMappings = toWidgetMappings(routerPaths, null)
+
+        // VALIDATION ROUTINE
+        val globalDefinitions = voyagerCodegen["definitions"] as? Map<String, Any>
+        val schema = voyagerCodegen["schema"] as Map<String, Map<String, *>>
+
+        val validationResult = validateVoyagerPaths(voyagerJson, schema, globalDefinitions)
+        val pageMappings = toPageMappings(routerPaths, null)
+
+        validationResult.errors.`should be empty`()
+
+        val generatedTargetDart = toPathsDart(
+                name = "Voyager",
+                routerPaths = routerPaths,
+                widgetMappings = widgetMappings,
+                pageMappings = pageMappings,
+                validationResult = validationResult,
+                `package` = "",
+                part = "test_3.dart"
         )!!
 
         generatedTargetDart `should be equal to` "/test_3.dart".asResource()

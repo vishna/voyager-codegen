@@ -2,6 +2,8 @@
 // ignore_for_file: public_member_api_docs
 part of 'test_1.dart';
 
+const String pathFab = "/fab";
+const String typeFab = "fab";
 const String pathHome = "/home";
 const String typeHome = "home";
 String pathOther(String title) {
@@ -9,5 +11,3 @@ String pathOther(String title) {
 }
 
 const String typeOther = "other";
-const String pathFab = "/fab";
-const String typeFab = "fab";

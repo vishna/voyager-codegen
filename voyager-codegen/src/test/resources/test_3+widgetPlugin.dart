@@ -2,15 +2,10 @@
 // ignore_for_file: public_member_api_docs
 part of 'test_3.dart';
 
-const String pathHome = "/home";
-const String typeHome = "home";
-String pathOther(String title) {
-  return "/other/$title";
-}
-
-const String typeOther = "other";
 const String pathFab = "/fab";
 const String typeFab = "fab";
+const String pathHome = "/home";
+const String typeHome = "home";
 const String pathList = "/list";
 const String typeList = "list";
 String pathObjectItem(String class_) {
@@ -18,6 +13,11 @@ String pathObjectItem(String class_) {
 }
 
 const String typeObjectItem = "object_item";
+String pathOther(String title) {
+  return "/other/$title";
+}
+
+const String typeOther = "other";
 String pathSuper({String await_, String async_}) {
   return "/keywords/$await_/$async_";
 }

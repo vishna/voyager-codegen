@@ -8,7 +8,10 @@ import java.util.concurrent.ConcurrentHashMap
 
 fun String.asYaml() :  Map<String, Map<String, *>> = Yaml().load(StringReader(this)) as Map<String, Map<String, *>>
 internal fun String.asYamlArray() :  List<*> = Yaml().load(StringReader(this)) as List<*>
-internal fun String.asJson() : JSONObject = JSONObject(this)
+internal fun String.asJson() :  Map<String, Map<String, *>> {
+    val jsonObject = JSONObject(this)
+    return jsonObject.toMap() as Map<String, Map<String, *>>
+}
 internal fun String.asJsonFromYaml() = JSONObject(asYaml())
 
 typealias ResourcePath = String
