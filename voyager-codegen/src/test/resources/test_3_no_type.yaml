@@ -1,0 +1,34 @@
+'/home' :
+  widget: PageWidget
+  title: "This is Home"
+  body: "Hello World"
+  fabPath: /fab
+  actions:
+    - target: /list
+      icon: e896
+'/other/:title' :
+  widget: PageWidget
+  body: "Welcome to the other side"
+  title: "This is %{title}"
+'/fab' :
+  widget: FabWidget
+  target: /other/thing
+  icon: e88f # check icons.dart for reference
+  await: true
+'/list' :
+  widget: ListWidget
+  title: "Voyager Talks"
+  items:
+    - city: "Berlin"
+      event: Droidcon
+      date: July 1, 2019
+    - city: "London"
+      event: FlutterLDN
+      date: October 21, 2019
+    - city: "Łódź"
+      event: Mobilization
+      date: October 26, 2019
+'/_object/:class':
+  widget: "%{class}Widget"
+'/keywords/:await/:async':
+  widget: ListWidget

@@ -190,7 +190,7 @@ fun Map<String, Map<String, *>>.asRouterPaths(): List<RouterPath> = keys
         .map {
             RouterPath(
                     path = it,
-                    type = this[it]?.get("type")?.toString() ?: "",
+                    type = this[it]?.get("type")?.toString() ?: it.typify(),
                     `package` = this[it]?.get("package")?.toString() ?: "",
                     config = this[it]
             )

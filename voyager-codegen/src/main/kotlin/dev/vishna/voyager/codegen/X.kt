@@ -52,3 +52,10 @@ fun debounced(id: String, time: Long = 300) : Boolean {
 }
 
 private val debounceMap = ConcurrentHashMap<String, Long>()
+
+fun String.typify() : String {
+    return split("/")
+            .map { it.replace(":","").trim() }
+            .filter { it.isNotBlank() }
+            .joinToString(separator = "_")
+}

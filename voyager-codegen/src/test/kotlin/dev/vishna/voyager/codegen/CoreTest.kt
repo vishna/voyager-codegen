@@ -38,7 +38,7 @@ class CoreTest {
         val widgetMappings = toWidgetMappings(routerPaths, null)
         val pageMappings = toPageMappings(routerPaths, null)
 
-        val generatedTargetDart = toPathsDart(name = "Voyager",routerPaths = routerPaths,
+        val generatedTargetDart = toPathsDart(name = "Voyager", routerPaths = routerPaths,
                 widgetMappings = widgetMappings, pageMappings = pageMappings,
                 `package` = "", part = "test_1.dart")
 
@@ -51,9 +51,9 @@ class CoreTest {
     fun validateRectangleYamlPOC() = runBlocking<Unit> {
         val rectangle = "/rectangle.yaml".asResource().asJsonFromYaml()
         val loader = SchemaLoader.builder()
-            .schemaJson("/rectangle_schema.yaml".asResource().asJsonFromYaml())
-            .draftV7Support()
-            .build()
+                .schemaJson("/rectangle_schema.yaml".asResource().asJsonFromYaml())
+                .draftV7Support()
+                .build()
         val schema = loader.load().build()
         try {
             schema.validate(rectangle)
@@ -96,13 +96,13 @@ class CoreTest {
         validationResult.errors.`should be empty`()
 
         val generatedTargetDart = toPathsDart(
-            name = "Voyager",
-            routerPaths = routerPaths,
-            widgetMappings = widgetMappings,
-            pageMappings = pageMappings,
-            validationResult = validationResult,
-            `package` = "",
-            part = "test_3.dart"
+                name = "Voyager",
+                routerPaths = routerPaths,
+                widgetMappings = widgetMappings,
+                pageMappings = pageMappings,
+                validationResult = validationResult,
+                `package` = "",
+                part = "test_3.dart"
         )!!
 
         generatedTargetDart `should be equal to` "/test_3.dart".asResource()
@@ -172,12 +172,33 @@ class CoreTest {
     }
 
     @Test
-    fun dartKeySanitization() {
-        "const".dartSanitize() shouldBeEqualTo "const_"
-        "Const".dartSanitize() shouldBeEqualTo "Const"
-        "foo".dartSanitize() shouldBeEqualTo "foo"
-        "class".dartSanitize() shouldBeEqualTo "class_"
-        "Class".dartSanitize() shouldBeEqualTo "Class"
+    fun validateYamlPlusSpecialKeysNoType() = runBlocking<Unit> {
+        // TEST DATA
+        val voyagerYaml = "/test_3_no_type.yaml".asResource().asYaml()
+        val voyagerCodegen = "/test_3_validation.yaml".asResource().asYamlArray().first() as Map<String, *>
+        val routerPaths = voyagerYaml.asRouterPaths()
+        val widgetMappings = toWidgetMappings(routerPaths, null)
+
+        // VALIDATION ROUTINE
+        val globalDefinitions = voyagerCodegen["definitions"] as? Map<String, Any>
+        val schema = voyagerCodegen["schema"] as Map<String, Map<String, *>>
+
+        val validationResult = validateVoyagerPaths(voyagerYaml, schema, globalDefinitions)
+        val pageMappings = toPageMappings(routerPaths, null)
+
+        validationResult.errors.`should be empty`()
+
+        val generatedTargetDart = toPathsDart(
+                name = "Voyager",
+                routerPaths = routerPaths,
+                widgetMappings = widgetMappings,
+                pageMappings = pageMappings,
+                validationResult = validationResult,
+                `package` = "",
+                part = "test_3.dart"
+        )!!
+
+        generatedTargetDart `should be equal to` "/test_3_no_type.dart".asResource()
     }
 }
 
