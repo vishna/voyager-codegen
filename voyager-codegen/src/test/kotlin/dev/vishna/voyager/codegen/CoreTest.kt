@@ -40,7 +40,7 @@ class CoreTest {
 
         val generatedTargetDart = toPathsDart(name = "Voyager", routerPaths = routerPaths,
                 widgetMappings = widgetMappings, pageMappings = pageMappings,
-                `package` = "", part = "test_1.dart")
+                `package` = "", part = "test_1.dart", nullsafety = true)
 
         requireNotNull(generatedTargetDart) { "Failed generating VoyagerPaths class for dart" }
 
@@ -102,7 +102,8 @@ class CoreTest {
                 pageMappings = pageMappings,
                 validationResult = validationResult,
                 `package` = "",
-                part = "test_3.dart"
+                part = "test_3.dart",
+                nullsafety = false
         )!!
 
         generatedTargetDart `should be equal to` "/test_3.dart".asResource()
@@ -132,7 +133,8 @@ class CoreTest {
                 pageMappings = pageMappings,
                 validationResult = validationResult,
                 `package` = "",
-                part = "test_3.dart"
+                part = "test_3.dart",
+                nullsafety = false
         )!!
 
         generatedTargetDart `should be equal to` "/test_3.dart".asResource()
@@ -165,7 +167,8 @@ class CoreTest {
                 pageMappings = pageMappings,
                 validationResult = validationResult,
                 `package` = "",
-                part = "test_3.dart"
+                part = "test_3.dart",
+                nullsafety = false
         )!!
 
         generatedTargetDart `should be equal to` "/test_3+widgetPlugin.dart".asResource()
@@ -195,10 +198,42 @@ class CoreTest {
                 pageMappings = pageMappings,
                 validationResult = validationResult,
                 `package` = "",
-                part = "test_3.dart"
+                part = "test_3.dart",
+                nullsafety = false
         )!!
 
         generatedTargetDart `should be equal to` "/test_3_no_type.dart".asResource()
+    }
+
+    @Test
+    fun validateYamlPlusSpecialKeysNoTypePlusNullsafety() = runBlocking<Unit> {
+        // TEST DATA
+        val voyagerYaml = "/test_3_no_type.yaml".asResource().asYaml()
+        val voyagerCodegen = "/test_3_validation.yaml".asResource().asYamlArray().first() as Map<String, *>
+        val routerPaths = voyagerYaml.asRouterPaths()
+        val widgetMappings = toWidgetMappings(routerPaths, null)
+
+        // VALIDATION ROUTINE
+        val globalDefinitions = voyagerCodegen["definitions"] as? Map<String, Any>
+        val schema = voyagerCodegen["schema"] as Map<String, Map<String, *>>
+
+        val validationResult = validateVoyagerPaths(voyagerYaml, schema, globalDefinitions)
+        val pageMappings = toPageMappings(routerPaths, null)
+
+        validationResult.errors.`should be empty`()
+
+        val generatedTargetDart = toPathsDart(
+                name = "Voyager",
+                routerPaths = routerPaths,
+                widgetMappings = widgetMappings,
+                pageMappings = pageMappings,
+                validationResult = validationResult,
+                `package` = "",
+                part = "test_3.dart",
+                nullsafety = true
+        )!!
+
+        generatedTargetDart `should be equal to` "/test_3_no_type_nullsafety.dart".asResource()
     }
 }
 

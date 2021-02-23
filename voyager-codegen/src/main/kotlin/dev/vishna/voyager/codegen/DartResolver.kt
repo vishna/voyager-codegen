@@ -3,7 +3,7 @@ package dev.vishna.voyager.codegen
 import dev.vishna.stringcode.camelize
 import dev.vishna.voyager.codegen.model.RouterPath
 
-class DartResolver : LangResolver() {
+class DartResolver(val nullsafety: Boolean) : LangResolver() {
     override fun pathExpression(routerPath: RouterPath): String {
 
         val name = "path_${routerPath.type}".camelize(startWithLowerCase = true);
@@ -18,6 +18,12 @@ class DartResolver : LangResolver() {
     }
 
     private fun argsExpression(routerPath: RouterPath) : String {
+
+        if (nullsafety && routerPath.params.size > 1) {
+            val args = routerPath.params.map { "required String ${it.dartSanitize()}" }.joinToString(separator = ",")
+            return "{$args}"
+        }
+
         val args = routerPath.params.map { "String ${it.dartSanitize()}" }.joinToString(separator = ",")
 
         if (routerPath.params.size > 1) {

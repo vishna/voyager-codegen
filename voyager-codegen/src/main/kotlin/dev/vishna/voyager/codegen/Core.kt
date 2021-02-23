@@ -11,6 +11,7 @@ import dev.vishna.stringcode.saveAs
 import kotlinx.coroutines.*
 import java.io.File
 import java.lang.IllegalStateException
+import kotlin.system.exitProcess
 
 internal val log by lazy { defaultLogger() }
 
@@ -64,7 +65,8 @@ suspend fun generateCode(
         dryRun: Boolean,
         runOnce: Boolean,
         setExitIfChanged: Boolean,
-        `package`: String
+        `package`: String,
+        nullsafety: Boolean
 ) = supervisorScope {
 
     if (source.isBlank()) {
@@ -135,7 +137,8 @@ suspend fun generateCode(
     jobs += async {
         generateVoyagerPaths(
                 name, routerPaths, widgetMappings, pageMappings,
-                target, part, dryRun, setExitIfChanged, validationResult, `package`)
+                target, part, dryRun, setExitIfChanged, validationResult,
+                `package`, nullsafety)
     }
     jobs.forEach { it.join() }
 }
@@ -150,9 +153,10 @@ suspend fun generateVoyagerPaths(
         dryRun: Boolean,
         setExitIfChanged: Boolean,
         validationResult: ValidationResult?,
-        `package`: String
+        `package`: String,
+        nullsafety: Boolean
 ) {
-    toPathsDart(name, part, widgetMappings, pageMappings, routerPaths, validationResult, `package`)
+    toPathsDart(name, part, widgetMappings, pageMappings, routerPaths, validationResult, `package`, nullsafety)
             ?.saveToTarget(target, dryRun, setExitIfChanged)
 }
 
@@ -175,8 +179,7 @@ private fun String.saveToTarget(target: String, dryRun: Boolean, setExitIfChange
         if (oldHashCode != hashCode()) {
             if (setExitIfChanged) {
                 log.boom.."${targetFile.absolutePath} did change and shouldn't have."
-                System.exit(1)
-                return
+                exitProcess(1)
             }
             saveAs(target)
             log.save..target
@@ -203,7 +206,8 @@ internal suspend fun toPathsDart(
         pageMappings: List<PageMapping>,
         routerPaths: List<RouterPath>,
         validationResult: ValidationResult? = null,
-        `package`: String
+        `package`: String,
+        nullsafety: Boolean
 ): String? {
     var data: VoyagerDataClassEmitter? = null
     val imports = mutableListOf<String>()
@@ -221,7 +225,7 @@ internal suspend fun toPathsDart(
                 .asResource()
                 .interpolate(
                         mapOf(
-                                "resolver" to DartResolver(),
+                                "resolver" to DartResolver(nullsafety),
                                 "name" to name,
                                 "paths" to routerPaths,
                                 "imports" to imports.distinctBy { it }.sortedBy { it },

@@ -61,6 +61,11 @@ fun main(args: CommandArgs) = args.patrol {
             } else {
                 watchPoint["pagePlugin"] as Map<String, Map<String, *>>?
             }
+            val nullsafety = if (watchPoint["nullsafety"] is Boolean) {
+                watchPoint["nullsafety"] as Boolean
+            } else {
+                true
+            }
             generateCode(
                 name = watchPoint.name,
                 source = watchPoint.source,
@@ -72,7 +77,8 @@ fun main(args: CommandArgs) = args.patrol {
                 dryRun = dryRun,
                 runOnce = runOnce,
                 setExitIfChanged = scope.setExitIfChanged,
-                `package` = watchPoint["package"] as String? ?: ""
+                `package` = watchPoint["package"] as String? ?: "",
+                nullsafety = nullsafety
             )
         }.apply {
             inspectionJobs[watchPoint.name]?.cancel()
